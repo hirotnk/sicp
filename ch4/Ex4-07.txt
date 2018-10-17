@@ -1,0 +1,41 @@
+     ((begin? exp) (eval-sequence (begin-actions exp) env))
+     ((cond? exp) (eval (cond->if exp) env))
+     ((let? exp) (eval (let->combination exp) env))
++    ((let*? exp) (eval (let*->nested-lets exp) env))
+     ((application? exp)
+       (apply
+         (eval (operator exp) env)
+ 
+ ;; derived expressions
+ ; let->combination
++(define (let*? exp) (tagged-list? exp 'let*))
+ (define (let? exp) (tagged-list? exp 'let))
++(define (let*->nested-lets exp)
++  (make-nested-lets (cadr exp) (caddr exp)))
++
++(define (make-nested-lets varlist body)
++  (if
++    (null? varlist) body
++    (list 'let (list (car varlist))
++          (make-nested-lets (cdr varlist) body))))
++  
++
+
+;; ;; Execution
+;; [/Users/yoshi/gith/giggle/sicp/ch4%] rlwrap gosh
+;; gosh> (load "./repl")
+;; 
+;; 
+;; ::: M-Eval input:
+;; (let* ((x 3) (y (+ x 2))) (+ x y))
+;; 
+;; ;;; M-Eval value:
+;; 8
+;; 
+;; ::: M-Eval input:
+;; (let* ((x 3) (y (+ x 2)) (z (+ x y 5))) (* x z))
+;; 
+;; ;;; M-Eval value:
+;; 39
+;; 
+

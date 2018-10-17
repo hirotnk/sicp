@@ -1,0 +1,26 @@
+;; (f f) -> (f 2) -> (2 2) -> invalid application
+
+h> (define (f g) (g 2))
+f
+gosh> (f sqrt)
+1.4142135623730951
+gosh> (f *)
+2
+gosh> (* 2)
+2
+gosh> (+ 2)
+2
+gosh> (trace f)
+#<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> (f f)
+CALL f #[proc]
+  CALL f 2
+*** ERROR: invalid application: (2 2)
+Stack Trace:
+_______________________________________
+  0  args
+
+  1  args
+
+gosh>
+

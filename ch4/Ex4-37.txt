@@ -1,0 +1,1 @@
+He is correct. It's saving the computation of n*n. 

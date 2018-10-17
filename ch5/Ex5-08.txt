@@ -1,0 +1,36 @@
+(if (assoc next-inst labels)
+    (error "Duplicate registered label:" next-inst)
+    (if (symbol? next-inst)
+      (receive insts
+               (cons (make-label-entry next-inst insts) labels))
+      (receive (cons (make-instruction next-inst) insts)
+               labels))))))))
+
+Execution:
+;; gosh>
+;; (define duptest-machine
+;; (make-machine
+;; '(a)
+;; '()
+;; '(start
+;; (goto (label here))
+;; here
+;; (assign a (const 3))
+;; (goto (label there))
+;; here
+;; (assign a (const 4))
+;; (goto (label there))
+;; there)))
+;; *** ERROR: Duplicate registered label: here
+;; Stack Trace:
+;; _______________________________________
+;;   0  (assemble controller-text machine)
+;;         At line 11 of "./machine.scm"
+;;   1  ((machine 'install-instruction-sequence) (assemble controller-text
+;;         At line 10 of "./machine.scm"
+;;   2  (make-machine '(a) '() '(start (goto (label here)) here (assign a
+;;         At line 93 of "(standard input)"
+;;   3  (eval expr env)
+;;         At line 179 of "/usr/local/Cellar/gauche/0.9.4/share/gauche-0.9/0.9.4/lib/gauche/interactive.scm"
+;; gosh>
+;; 

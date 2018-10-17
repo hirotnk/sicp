@@ -1,0 +1,132 @@
+(factorial 5) will end up with infinite-loop, because '(* n (factorial (- n
+1))) will be evaluated even if n == 1.  It will work in a normal-order language
+since when '(* n (factorial (- n 1))) won't be evaluated when n == 1.  
+
+Tracing makes it clearer:
+[/Users/yoshi/gith/sicp/ch4%] rlwrap gosh                                                                                                                                                        *[master]
+(load "./repl-lazy")
+(trace eval)
+(trace apply)
+(trace list-of-arg-values)
+(trace list-of-delayed-args)
+(trace procedure-parameters)
+(trace eval-sequence)
+(trace procedure-body)
+(trace eval-sequence)
+(trace actual-value)
+(trace force-it)
+(trace delay-it)
+(run)
+#t
+gosh> #<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> #<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> #<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> #<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> #<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> #<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> #<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> #<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> #<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> #<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> #<closure (debug:trace-procedure debug:trace-procedure)>
+gosh>
+
+;;; L-Eval input:
+(define (try a b) (if (= a 0) 1 b))
+CALL eval (define (try ...) (if ...)) (((...) (...) (...) (...) (...) ...))
+  CALL eval (lambda (a ...) (if (...) ...)) (((...) (...) (...) (...) ...))
+  RETN eval (procedure (a b) ((if (...) 1 ...)) (((...) (...) (...) ...)))
+RETN eval ok
+
+;;; L-Eval value:
+ok
+
+
+;;; L-Eval input:
+(try 0 (/ 1 0))
+CALL actual-value (try 0 (/ 1 0)) (((...) (...) (...) (...) (...) (...) ...))
+  CALL eval (try 0 (/ 1 0)) (((...) (...) (...) (...) (...) (...) (...) ...))
+    CALL actual-value try (((...) (...) (...) (...) (...) (...) (...) (...) ...))
+      CALL eval try (((...) (...) (...) (...) (...) (...) (...) (...) (...) ...))
+      RETN eval (procedure (a b) ((if (...) 1 ...)) (((...) (...) (...) ...)))
+      CALL force-it (procedure (a b) ((if (...) ...)) (((...) (...) (...) ...)))
+      RETN force-it (procedure (a b) ((if (...) ...)) (((...) (...) (...) ...)))
+    RETN actual-value (procedure (a b) ((if (...) ...)) (((...) (...) ...)))
+
+    CALL apply (procedure ...) (0 (/ 1 0)) (((...) (...) (...) (...) (...) ...))
+      CALL procedure-body (procedure (a b) ((if (...) ...)) (((...) (...) ...)))
+      RETN procedure-body ((if (= a 0) 1 b))
+
+      CALL procedure-parameters (procedure (a ...) ((if ...)) (((...) (...) ...)))
+      RETN procedure-parameters (a b)
+
+      CALL list-of-delayed-args (0 (/ 1 0)) (((...) (...) (...) (...) (...) ...))
+        CALL delay-it 0 (((...) (...) (...) (...) (...) (...) (...) (...) (...) ...))
+        RETN delay-it (thunk 0 (((...) (...) (...) (...) (...) (...) (...) ...)))
+        CALL list-of-delayed-args ((/ 1 0)) (((...) (...) (...) (...) (...) ...))
+          CALL delay-it (/ 1 0) (((...) (...) (...) (...) (...) (...) (...) (...) ...))
+          RETN delay-it (thunk (/ 1 0) (((...) (...) (...) (...) (...) (...) ...)))
+          CALL list-of-delayed-args () (((...) (...) (...) (...) (...) (...) ...))
+          RETN list-of-delayed-args ()
+        RETN list-of-delayed-args ((thunk (/ 1 0) (((...) (...) (...) (...) ...))))
+      RETN list-of-delayed-args ((thunk 0 (((...) ...))) (thunk (...) (((...) ...))))
+
+      CALL eval-sequence ((if (...) 1 b)) (((...) (b ...)) ((...) (...) (...) ...))
+        CALL eval (if (...) 1 b) (((a ...) (b thunk ...)) ((...) (...) (...) ...))
+          CALL actual-value (= a 0) (((a ...) (b thunk ...)) ((...) (...) (...) ...))
+            CALL eval (= a 0) (((a ...) (b thunk ...)) ((...) (...) (...) (...) ...))
+            |  ;; eval `='
+            |  CALL actual-value = (((a ...) (b thunk ...)) ((...) (...) (...) (...) ...))
+            |    CALL eval = (((a thunk ...) (b thunk ...)) ((...) (...) (...) (...) ...))
+            |    RETN eval (primitive #[proc])
+            |    CALL force-it (primitive #[proc])
+            |    RETN force-it (primitive #[proc])
+            |  RETN actual-value (primitive #[proc])
+            |  CALL apply (primitive ...) (a 0) (((a ...) (b ...)) ((...) (...) (...) ...))
+            |  | CALL list-of-arg-values (a 0) (((a ...) (b ...)) ((...) (...) (...) ...))
+            |  |   CALL actual-value a (((a ...) (b thunk ...)) ((...) (...) (...) (...) ...))
+            |  |   | ;; eval `a'
+            |  |   | CALL eval a (((a thunk ...) (b thunk ...)) ((...) (...) (...) (...) ...))
+            |  |   | RETN eval (thunk 0 (((...) (...) (...) (...) (...) (...) (...) (...) ...)))
+            |  |   | CALL force-it (thunk 0 (((...) (...) (...) (...) (...) (...) (...) ...)))
+            |  |   |   CALL actual-value 0 (((...) (...) (...) (...) (...) (...) (...) (...) ...))
+            |  |   |     CALL eval 0 (((...) (...) (...) (...) (...) (...) (...) (...) (...) ...))
+            |  |   |     RETN eval 0
+            |  |   |     CALL force-it 0
+            |  |   |     RETN force-it 0
+            |  |   |   RETN actual-value 0
+            |  |   | RETN force-it 0
+            |  |   RETN actual-value 0
+            |  |   ;; eval `0'
+            |  |   CALL list-of-arg-values (0) (((a ...) (b ...)) ((...) (...) (...) (...) ...))
+            |  |   | CALL actual-value 0 (((a ...) (b thunk ...)) ((...) (...) (...) (...) ...))
+            |  |   |   CALL eval 0 (((a thunk ...) (b thunk ...)) ((...) (...) (...) (...) ...))
+            |  |   |   RETN eval 0
+            |  |   |   CALL force-it 0
+            |  |   |   RETN force-it 0
+            |  |   | RETN actual-value 0
+            |  |   | CALL list-of-arg-values () (((a ...) (b thunk ...)) ((...) (...) (...) ...))
+            |  |   | RETN list-of-arg-values ()
+            |  |   RETN list-of-arg-values (0)
+            |  | RETN list-of-arg-values (0 0)
+            |  RETN apply true
+            RETN eval true
+            CALL force-it true
+            RETN force-it true
+          RETN actual-value true
+          CALL eval 1 (((a thunk ...) (b thunk ...)) ((...) (...) (...) (...) ...))
+          RETN eval 1
+        RETN eval 1
+      RETN eval-sequence 1
+    RETN apply 1
+  RETN eval 1
+  CALL force-it 1
+  RETN force-it 1
+RETN actual-value 1
+
+;;; L-Eval value:
+1
+
+;;; L-Eval input:
+
+

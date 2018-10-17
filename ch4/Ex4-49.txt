@@ -1,0 +1,368 @@
+(define (parse-word word-list)
+  ;;; Start:
+  ;;; without this part, the program falls into infinite loop
+  (require (not (null? *unparsed*)))
+  (require (memq (car *unparsed*) (cdr word-list)))
+  (let ((found-word (car *unparsed*)))
+    (set! *unparsed* (cdr *unparsed*)))
+  ;;; End:
+
+  (define (try-all list)
+    (require (not (null? list)))
+    (amb (car list) (try-all (cdr list))))
+  (try-all (cdr word-list)))
+
+Execution:
+;; [/Users/yoshi/gith/sicp/ch4%] rlwrap gosh
+;;  (load "./repl-amb")
+;; 
+;; (amb-run)
+;; 
+;; (define (require p)
+;;   (if (not p) (amb)))
+;; 
+;; 
+;; (define nouns '(noun student professor cat class))
+;; (define verbs '(verb studies lectures eats sleeps))
+;; (define articles '(article the a))
+;; (define prepositions '(prep for to in by with))
+;; 
+;; (define (parse-sentence)
+;;   (list 'sentence
+;;         (parse-noun-phrase)
+;;         (parse-verb-phrase)))
+;; 
+;; (define (parse-simple-noun-phrase)
+;; #t
+;; gosh>
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;;   (list 'simple-noun-phrase
+;;     (parse-word articles)
+;;     (parse-word nouns)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (define (parse-noun-phrase)
+;;   (define (maybe-extend noun-phrase)
+;;     (amb noun-phrase
+;;         (maybe-extend
+;;           (list 'noun-phrase noun-phrase (parse-prepositional-phrase)))))
+;;   (maybe-extend (parse-simple-noun-phrase)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; 
+;; 
+;; (define (parse-word word-list)
+;;   (require (not (null? *unparsed*)))
+;;   (require (memq (car *unparsed*) (cdr word-list)))
+;;   (let ((found-word (car *unparsed*)))
+;;     (set! *unparsed* (cdr *unparsed*)))
+;;   (define (try-all list)
+;;     (require (not (null? list)))
+;;     (amb (car list) (try-all (cdr list))))
+;;   (try-all (cdr word-list)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;  (require (not (null? *unparsed*)))
+;; ;  (require (memq (car *unparsed*) (cdr word-list)))
+;; ;  (let ((found-word (car *unparsed*)))
+;; ;    (set! *unparsed* (cdr *unparsed*))
+;; ;    (list (car word-list) found-word)))
+;; 
+;; (define (parse-prepositional-phrase)
+;;   (list 'prep-phrase
+;;     (parse-word prepositions)
+;;     (parse-noun-phrase)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; 
+;; (define (parse-verb-phrase)
+;;   (define (maybe-extend verb-phrase)
+;;     (amb verb-phrase
+;;       (maybe-extend
+;;         (list 'verb-phrase verb-phrase (parse-prepositional-phrase)))))
+;;   (maybe-extend (parse-word verbs)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (define *unparsed* '())
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; (define (parse input)
+;;   (set! *unparsed* input)
+;;   (let ((sent (parse-sentence)))
+;;     (require (null? *unparsed*))
+;;     sent))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (parse '(the cat eats))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the student) studies)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the student) lectures)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the student) eats)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the student) sleeps)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the professor) studies)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the professor) lectures)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the professor) eats)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the professor) sleeps)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the cat) studies)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the cat) lectures)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the cat) eats)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the cat) sleeps)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the class) studies)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the class) lectures)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the class) eats)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the class) sleeps)
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a student) studies)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a student) lectures)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a student) eats)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a student) sleeps)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a professor) studies)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a professor) lectures)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a professor) eats)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a professor) sleeps)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a cat) studies)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a cat) lectures)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a cat) eats)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a cat) sleeps)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a class) studies)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a class) lectures)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a class) eats)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase a class) sleeps)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; There are no more values of
+;; (parse '(the cat eats))
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; 

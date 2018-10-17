@@ -1,0 +1,68 @@
+Compare this:
+(lambda <vars>
+  (define u <e1>)
+  (define v <e2>)
+  <e3>)
+
+with:
+(lambda <vars>
+  (let
+    ((u '*unassigned) 
+     (v '*unassigned))
+    (set! u <e1>)
+    (set! v <e2>)
+    <e3>))
+
+Then definition of tihs will be transformed from:
+(define (solve f y0 dt)
+  (define y (integral (delay dy) y0 dt))
+  (define dy (stream-map f y))
+  y)
+
+to
+
+1):
+(lambda (f y0 dt)
+  (let
+    ((y '*unassigned)
+     (dy '*unassigned))
+    (set! y (integral (delay dy) y0 dt)) ; 'dy is '*unassigned, but evaluation is delayed
+    (set! dy (stream-map f y))
+    y))
+2):
+(lambda (f y0 dt)
+  (let
+    ((y '*unassigned*)
+     (dy '*unassigned*))
+    (let ((a (integral (delay dy) y0 dt))
+          (b (stream-map f y))) ; 'y needs to be evaluated here, but still '*unassigned. So it will fail here.
+      (set! y a)
+      (set! dy b)
+      y)))
+
+In case of 1), it works because the evaluation of '(delay dy) will be
+delayed when executing '(set! y (integral (delay dy) y0 dt)). Then the
+evaluation of '(set! dy (stream-map f y) would work since 'y is already
+set at this moment.
+
+On the other hand 2) does not work because when executing '(b (stream-map
+f y), 'y is not defined properly yet.
+
+
+In Gauche: using internal definition
+gosh> a
+1
+gosh> b
+2
+gosh> (let ((a #?=b) (b #?=a)) (set! a #?=b) (set! b #?=a) (+ a b))
+#?=b
+#?-    2
+#?=a
+#?-    1
+#?=b
+#?-    1
+#?=a
+#?-    1
+2
+gosh>
+

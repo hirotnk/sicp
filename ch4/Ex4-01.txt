@@ -1,0 +1,61 @@
+;; left -> right
+(define (list-of-values exps env)
+  (if (no-operands? exps)
+    '()
+    (let
+      ((h (eval (first-operand exps) env)))
+      (cons h 
+      (list-of-values (rest-operands exps) env)))))
+
+;; right -> left
+(define (list-of-values exps env)
+  (if (no-operands? exps)
+    '()
+    (let
+      ((t (list-of-values (rest-operands exps) env)))
+      (cons
+        (eval (first-operand exps) env) t))))
+
+
+;; another example
+(define (list-of-values exps)
+  (if
+    (eq? exps '()) '()
+    (let
+      ((firsteval (eval (car exps) '(interaction-environment))))
+      (cons
+        firsteval
+        (list-of-values (cdr exps))))))
+
+
+(define (list-of-values-r exps)
+  (if
+    (eq? exps '()) '()
+    (let
+      ((restofvalues (list-of-values-r (cdr exps))))
+      (cons
+        (eval (car exps) '(interaction-environment))
+        restofvalues))))
+
+;; Execution
+; gosh> (load "./ex41")
+; #t
+; gosh> (list-of-values-r '(1 2 3))
+; (1 2 3)
+; gosh> (list-of-values-r '(1 2 3))
+; (1 2 3)
+; gosh> (print 1)
+; 1
+; #<undef>
+; gosh> (list-of-values-r '((print 1) (print 2) (print 3)))
+; 3
+; 2
+; 1
+; (#<undef> #<undef> #<undef>)
+; gosh> (list-of-values '((print 1) (print 2) (print 3)))
+; 1
+; 2
+; 3
+; (#<undef> #<undef> #<undef>)
+; gosh>
+

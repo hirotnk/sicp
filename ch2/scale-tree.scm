@@ -1,0 +1,16 @@
+(define (scale-tree tree factor)
+    (cond     ((null? tree) tree)
+            ((not (pair? tree)) (* tree factor))
+            (else (cons (scale-tree (car tree) factor)
+                          (scale-tree (cdr tree) factor)))))
+
+(define (tree-map f tree)
+    (map (lambda (sub-tree)
+            (if (pair? sub-tree) (tree-map f sub-tree)
+                (f sub-tree)))
+        tree))
+;gosh> (tree-map sqrt (list 1 (list 2 3) (list 4 5 (list 6 7 8) 9 10) (list 11 12) 13))
+;(1 (1.4142135623730951 1.7320508075688772) (2 2.23606797749979 (2.449489742783178 2.6457513110645907 2.8284271247461903) 3 3.1622776601683795) (3.3166247903554 3.4641016151377544) 3.605551275463989)
+;gosh> (tree-map (lambda (x) (* x x)) (list 1 (list 2 3) (list 4 5 (list 6 7 8) 9 10) (list 11 12) 13))
+;(1 (4 9) (16 25 (36 49 64) 81 100) (121 144) 169)
+

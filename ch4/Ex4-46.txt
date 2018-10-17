@@ -1,0 +1,2 @@
+Becase a sentence needs to be parsed according to the order of the grammer, word by word.
+

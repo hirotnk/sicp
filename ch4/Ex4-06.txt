@@ -1,0 +1,55 @@
+     ((begin? exp) (eval-sequence (begin-actions exp) env))
+     ((cond? exp) (eval (cond->if exp) env))
++    ((let? exp) (eval (let->combination exp) env))
+     ((application? exp)
+       (apply
+         (eval (operator exp) env)
+ 
++; let->combination
++(define (let? exp) (tagged-list? exp 'let))
++(define (let->combination exp)
++  (let
++    ((varlist (map car (cadr exp)))
++     (arglist (map cadr (cadr exp)))
++     (letbody (caddr exp)))
++      ;; 'letbody' is a list, and it needs to be
++      ;; (letbody) in order to be evaluated.
++      (cons (make-lambda varlist (list letbody)) arglist)
++      ))
++
+
+;; Execution
+;; [/Users/yoshi/gith/giggle/sicp/ch4%] rlwrap gosh
+;; gosh> (load "./repl")
+;; 
+;; 
+;; ::: M-Eval input:
+;; (let ((a (* 2 3)) (b (+ 3 4))) (+ a b))
+;; 
+;; ;;; M-Eval value:
+;; 13
+;; 
+;; ::: M-Eval input:
+;; (define (foo k) (let ((a (* 2 3)) (b (+ 4 5))) (+ a b k)))
+;; 
+;; ;;; M-Eval value:
+;; ok
+;; 
+;; ::: M-Eval input:
+;; (foo 2)
+;; 
+;; ;;; M-Eval value:
+;; 17
+;; 
+;; ::: M-Eval input:
+;; (define (bar k) (+ k 2 3))
+;; 
+;; ;;; M-Eval value:
+;; ok
+;; 
+;; ::: M-Eval input:
+;; (bar 1)
+;; 
+;; ;;; M-Eval value:
+;; 6
+;; 

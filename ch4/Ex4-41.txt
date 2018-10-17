@@ -1,0 +1,101 @@
+This question becomes much easier if list comprehension is avialable.
+;; Solution 1
+(define floors '(1 2 3 4 5))
+
+(define (flatmap proc seq)
+  (apply append (map proc seq)))
+
+(define (get-list x elements)
+  (map (lambda (e) (cons x e)) elements))
+
+(define (distinct? items)
+  (cond ((null? items) #t)
+      ((null? (cdr items)) #t)
+          ((member (car items) (cdr items)) #f)
+              (else (distinct? (cdr items)))))
+
+(define (name-map p)
+  (let
+    ((b (car p))
+     (f (cadr p))
+     (c (caddr p))
+     (m (cadddr p))
+     (s (cadddr (cdr p))))
+    (list
+      (list 'baker b)
+      (list 'fletcher f)
+      (list 'cooper c)
+      (list 'miller m)
+      (list 'smith s))))
+
+(define multiple-dwelling
+  (map (lambda (result) (name-map result))
+    (filter
+      (lambda (p)
+        (let
+          ((b (car p))
+           (f (cadr p))
+           (c (caddr p))
+           (m (cadddr p))
+           (s (cadddr (cdr p))))
+          (and
+             (distinct? (list b f c m s))
+             (not (= b 5))
+             (not (= f 5))
+             (not (= f 1))
+             (not (= c 1))
+             (> m c)
+             (not (= (abs (- s f)) 1))
+             (not (= (abs (- f c)) 1))))) get-all)))
+
+; LOL.. you could use permutations here..
+(define get-all
+  (flatmap
+    (lambda (s)
+      (get-list s
+        (flatmap
+          (lambda (m)
+            (get-list m
+              (flatmap
+                (lambda (c)
+                  (get-list c
+                    (flatmap
+                      (lambda (b)
+                        (get-list b (map (lambda (f) (cons f '())) floors)))
+                      floors)))
+               floors)))
+         floors)))
+  floors))
+
+;; Solution 2
+(use srfi-42)
+
+(define (distinct? items)
+  (cond ((null? items) #t)
+      ((null? (cdr items)) #t)
+          ((member (car items) (cdr items)) #f)
+              (else (distinct? (cdr items)))))
+
+(define (to-name n v) (list n v))  
+
+(define multiple-dwelling
+  (list-ec (:range baker 1 6)
+           (:range fletcher 1 6)
+           (:range cooper 1 6)
+           (:range miller 1 6)
+           (:range smith 1 6)
+           (and
+              (distinct? (list baker fletcher cooper miller smith))
+              (not (= baker 5))
+              (not (= fletcher 5))
+              (not (= fletcher 1))
+              (not (= cooper 1))
+              (> miller cooper)
+              (not (= (abs (- smith fletcher)) 1))
+              (not (= (abs (- fletcher cooper)) 1)))
+           (list (to-name 'baker baker)
+                 (to-name 'fletcher fletcher)
+                 (to-name 'cooper cooper)
+                 (to-name 'miller miller)
+                 (to-name 'smith smith)))
+)

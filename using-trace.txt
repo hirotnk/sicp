@@ -1,0 +1,37 @@
+$ [/Users/yoshihiro.tanaka/gith/giggle%] rlwrap gosh
+gosh> (use slib)
+#<undef>
+gosh> (require 'trace)
+#t
+gosh> (load "./1-31")
+#t
+gosh> (trace qpi)
+#<closure (debug:trace-procedure debug:trace-procedure)>
+gosh> (qpi 3)
+CALL qpi 3
+RETN qpi 1
+1
+gosh> (* 4 (qpi 15))
+4194304/1288287
+gosh> (* 4.0 (qpi 15))
+3.255721745232235
+gosh> (* 4.0 (qpi 20))
+3.221088996975674
+gosh> (* 4.0 (qpi 50))
+3.17316407023953
+gosh> (* 4.0 (qpi 100))
+3.157339689217565
+gosh> (* 4.0 (qpi 200))
+3.1494564280813027
+gosh> (* 4.0 (qpi 300))
+3.146832997381667
+gosh> (* 4.0 (qpi 1000))
+3.143163842419198
+gosh> (* 4.0 (qpi 2000))
+3.1423781499034096
+gosh> (* 4.0 (qpi 10000))
+3.1417497371492673
+gosh>
+
+
+

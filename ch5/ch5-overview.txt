@@ -1,0 +1,16 @@
+5.2 A Register-Machine Simulator
+
+Build a register machine simulator that can run register-machine
+language(controller).
+
+5.4 The Explicit-Control Evaluator
+
+Implement the metacircular evaluator (Scheme interpreter) using
+register-machine language, showing how the underlying procedure-calling and
+argument-passing mechanisms used in the evaluation process can be described in
+terms of operations on registers and stacks.
+
+5.5 Compilation
+
+Run Scheme program on a register-machine whose controller is not a Scheme interpreter.
+Implement a compiler that takes Scheme program and ouputs machine code that can run on a register-machine sumulator.

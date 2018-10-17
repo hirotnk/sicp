@@ -1,0 +1,56 @@
+ 
+ ;; conditionals
+-(define (if? exp) (tagged-list? exp 'if))
++(define (if? exp)
++  (and (tagged-list? exp 'if)
++       (tagged-list? (cddr exp) 'then)
++       (tagged-list? (cddddr exp) 'else)))
++
+ (define (if-predicate exp) (cadr exp))
+-(define (if-consequent exp) (caddr exp))
++(define (if-consequent exp) (cadddr exp))
+ (define (if-alternative exp)
+-  (if
+-    (not (null? (cdddr exp))) (cadddr exp)
+-    #f))
++  (let
++    ((ifalternative (caddr (cdddr exp))))
++    (if
++      (not (null? ifalternative)) ifalternative
++      #f)))
+ 
+ (define (make-if predicate consequent alternative)
+-  (list 'if predicate consequent alternative))
++  (list 'if predicate 'then consequent 'else alternative))
+
+;; Execution
+;; 
+;; [/Users/yoshi/gith/giggle/sicp/ch4%] rlwrap gosh
+;; gosh> (load "./repl")
+;; #t
+;; gosh> (driver-loop)
+;; 
+;; 
+;; ::: M-Eval input:
+;; (define (if-test x) (if (= x 3) then true else false))
+;; 
+;; ;;; M-Eval value:
+;; ok
+;; 
+;; ::: M-Eval input:
+;; (if-test 0)
+;; (if (= x 3) then true else false)
+;; (= x 3)
+;; 
+;; ;;; M-Eval value:
+;; #f
+;; 
+;; ::: M-Eval input:
+;; (if-test 3)
+;; (if (= x 3) then true else false)
+;; (= x 3)
+;; 
+;; ;;; M-Eval value:
+;; #t
+;; 
+;;  

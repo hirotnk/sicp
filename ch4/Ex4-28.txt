@@ -1,0 +1,48 @@
+1. with actual-value:
+
+;;; L-Eval input:
+(define (add x) (lambda () (+ x 1)))
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(define (func f a) ((f a)))
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(func add 2)
+
+;;; L-Eval value:
+3
+
+
+2. without actual-value:
+;;; L-Eval input:
+(define (add x) (lambda () (+ x 1)))
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(define (func f a) ((f a)))
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(func add 2)
+*** ERROR: Unknown procedure type: APPLY (thunk #0=(procedure (x) ((lambda () (+ x 1))) #1=(((car primitive #<subr car>) (cdr primitive #<subr cdr>) (cons primitive #<subr cons>) (cadr primitive #<subr cadr>) (assoc primitive #<closure assoc>) (< primitive #<subr <>) (> primitive #<subr >>) (+ primitive #<subr +>) (- primitive #<subr ->) (* primitive #<subr *>) (/ primitive #<subr />) (= primitive #<subr =>) (print primitive #<closure print>) (null? primitive #<subr null?>) (true . #t) (false . #f) (add . #0#) (func procedure (f a) (((f a))) #1#)))) #1#)
+Stack Trace:
+_______________________________________
+  0  (eval (operator exp) env)
+        At line 53 of "./repl-lazy.scm"
+  1  (eval exp env)
+        At line 59 of "./repl-lazy.scm"
+  2  (actual-value input the-global-environment)
+        At line 143 of "./repl-lazy.scm"
+  3  (eval expr env)
+        At line 179 of "/usr/local/Cellar/gauche/0.9.4/share/gauche-0.9/0.9.4/lib/gauche/interactive.scm"
+

@@ -1,0 +1,391 @@
+I'm not totally understanding it, but following is what *I think* is going on:
+
+gosh> (load "./repl-lazy")
+#t
+gosh> (define the-global-environment (setup-environment))
+the-global-environment
+gosh> (driver-loop)
+
+
+;;; L-Eval input:
+(define count 0)
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(define (id x) (set! count (+ count 1)) x) ;; making lambda, set! is not evaluated yet
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(define w (id (id 10))) ;; outer id is evaluated, executes set! in the lambda, return the delayed object
+                        ;; `(id 10)' is turned into thunk at this moment
+
+=>
+
+((definition? exp) (eval-definition exp env))
+
+=>
+
+(define-variable! (definition-variable '(define w (id (id 10))))
+                  (eval (definition-value '(define w (id (id 10)))) env)
+                  env)
+
+
+=>
+
+since 'w is a symbol, definition-value returns '(id (id 10))
+
+
+=>
+
+(define-variable! (definition-variable '(define w (id (id 10))))
+                  (eval '(id (id 10)) env)
+                  env)
+
+since '(id (id 10)) is a pair, it's an application.
+
+
+=>
+
+(apply
+  (actual-value (operator '(id (id 10))) env)
+  (operands '(id (id 10)))
+  env))
+
+
+=>
+
+(apply
+  (actual-value id env)
+  (operands '(id (id 10)))
+  env))
+
+
+
+=>
+
+(apply
+  (force-it (eval id env)))
+  (operands '(id (id 10)))
+  env))
+
+
+=>
+
+(apply
+  (force-it '(procedure (x) ((set! count (+ count 1)) x) #0#))
+  (operands '(id (id 10)))
+  env))
+
+
+=>
+
+(apply
+  (procedure (x) ((set! count (+ count 1)) x) #0#))
+  (id 10)
+  env))
+
+
+=>
+
+
+(eval-sequence
+  (procedure-body (procedure (x) ((set! count (+ count 1)) x) #0#))
+  (extend-environment
+    (procedure-parameters (procedure (x) ((set! count (+ count 1)) x) #0#))
+    (list-of-delayed-args (id 10) env)
+    (procedure-environment (procedure (x) ((set! count (+ count 1)) x) #0#))))))
+
+
+=>
+
+(eval-sequence
+  (((set! count (+ count 1)) x) #0#)
+  (extend-environment
+    (x)
+    (thunk (thunk id env) 10 env)
+    env)
+
+
+=>
+
+(eval-sequence
+  ((set! count (+ count 1)) x) #0#)
+  (extend-environment
+    (x)
+    (thunk (thunk id env) 10 env)
+    env)
+
+
+=>
+
+(eval-sequence
+  ((set! count (+ count 1)) thunk) #0#)
+
+
+=>
+
+(thunk (thunk id env) 10 env)
+
+
+=>
+
+(define-variable! (definition-variable '(define w (id (id 10))))
+                  (thunk (thunk id env) 10 env)
+                  env)
+
+
+=>
+
+(define-variable! w
+                  (thunk (thunk id env) 10 env)
+                  env)
+
+So, at this point, w is registered to env as thunk of (id 10).
+When w is evaluated, this thunk will be forced to apply.
+
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+count
+
+;;; L-Eval value:
+1
+
+;;; L-Eval input:
+w ;; delayed object is applied at this point
+
+;;; L-Eval value:
+10
+
+;;; L-Eval input:
+count
+
+;;; L-Eval value:
+2
+
+;;; L-Eval input:
+w
+
+;;; L-Eval value:
+10
+
+;;; L-Eval input:
+count
+
+;;; L-Eval value:
+2
+
+;;; L-Eval input:
+(define count 0)
+CALL actual-value (define count 0) (((...) (...) (...) (...) (...) ...))
+  CALL eval (define count 0) (((...) (...) (...) (...) (...) (...) (...) ...))
+    CALL eval 0 (((...) (...) (...) (...) (...) (...) (...) (...) (...) ...))
+    RETN eval 0
+  RETN eval ok
+  CALL force-it ok
+  RETN force-it ok
+RETN actual-value ok
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(define (id x) (set! count (+ count 1)) x)
+CALL actual-value (define (...) (...) ...) (((...) (...) (...) (...) ...))
+  CALL eval (define (...) (...) x) (((...) (...) (...) (...) (...) (...) ...))
+    CALL eval (lambda (...) (...) x) (((...) (...) (...) (...) (...) (...) ...))
+    RETN eval (procedure (x) ((set! ...) x) (((...) (...) (...) (...) ...)))
+  RETN eval ok
+  CALL force-it ok
+  RETN force-it ok
+RETN actual-value ok
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(define w (id (id 10)))
+CALL actual-value (define w (id (id ...))) (((...) (...) (...) (...) ...))
+  CALL eval (define w (id (id 10))) (((...) (...) (...) (...) (...) (...) ...))
+    CALL eval (id (id 10)) (((...) (...) (...) (...) (...) (...) (...) ...))
+    | CALL actual-value id (((...) (...) (...) (...) (...) (...) (...) (...) ...))
+    |   CALL eval id (((...) (...) (...) (...) (...) (...) (...) (...) (...) ...))
+    |   RETN eval (procedure (x) ((set! ...) x) (((...) (...) (...) (...) ...)))
+    |   CALL force-it (procedure (x) ((set! ...) x) (((...) (...) (...) (...) ...)))
+    |   RETN force-it (procedure (x) ((set! ...) x) (((...) (...) (...) (...) ...)))
+    | RETN actual-value (procedure (x) ((set! ...) ...) (((...) (...) (...) ...)))
+    | CALL apply (procedure ...) ((id 10)) (((...) (...) (...) (...) (...) ...))
+    |   CALL procedure-body (procedure (x) ((...) x) (((...) (...) (...) (...) ...)))
+    |   RETN procedure-body ((set! count (+ count ...)) x)
+    |   CALL procedure-parameters (procedure (x) ((...) ...) (((...) (...) ...)))
+    |   RETN procedure-parameters (x)
+    |   CALL list-of-delayed-args ((id 10)) (((...) (...) (...) (...) (...) ...))
+    |     CALL delay-it (id 10) (((...) (...) (...) (...) (...) (...) (...) (...) ...))
+    |     RETN delay-it (thunk (id 10) (((...) (...) (...) (...) (...) (...) ...)))
+    |     CALL list-of-delayed-args () (((...) (...) (...) (...) (...) (...) ...))
+    |     RETN list-of-delayed-args ()
+    |   RETN list-of-delayed-args ((thunk (id 10) (((...) (...) (...) (...) ...))))
+    |   CALL eval-sequence ((set! ...) x) (((x thunk ...)) ((...) (...) (...) ...))
+    |     CALL actual-value (set! count (+ count ...)) (((x ...)) ((...) (...) ...))
+    |       CALL eval (set! count (+ count 1)) (((x thunk ...)) ((...) (...) (...) ...))
+    |         CALL eval (+ count 1) (((x thunk (...) ...)) ((...) (...) (...) (...) ...))
+    |         | CALL actual-value + (((x thunk (...) ...)) ((...) (...) (...) (...) ...))
+    |         |   CALL eval + (((x thunk (id ...) ((...)))) ((...) (...) (...) (...) ...))
+    |         |   RETN eval (primitive #[proc])
+    |         |   CALL force-it (primitive #[proc])
+    |         |   RETN force-it (primitive #[proc])
+    |         | RETN actual-value (primitive #[proc])
+    |         | CALL apply (primitive ...) (count 1) (((x thunk ...)) ((...) (...) ...))
+    |         |   CALL list-of-arg-values (count 1) (((x thunk ...)) ((...) (...) (...) ...))
+    |         |     CALL actual-value count (((x thunk (...) ...)) ((...) (...) (...) (...) ...))
+    |         |       CALL eval count (((x thunk (...) (((...) ...)))) ((...) (...) (...) ...))
+    |         |       RETN eval 0
+    |         |       CALL force-it 0
+    |         |       RETN force-it 0
+    |         |     RETN actual-value 0
+    |         |     CALL list-of-arg-values (1) (((x thunk (...) ...)) ((...) (...) (...) ...))
+    |         |       CALL actual-value 1 (((x thunk (...) ...)) ((...) (...) (...) (...) ...))
+    |         |         CALL eval 1 (((x thunk (id ...) ((...)))) ((...) (...) (...) (...) ...))
+    |         |         RETN eval 1
+    |         |         CALL force-it 1
+    |         |         RETN force-it 1
+    |         |       RETN actual-value 1
+    |         |       CALL list-of-arg-values () (((x thunk (...) ...)) ((...) (...) (...) ...))
+    |         |       RETN list-of-arg-values ()
+    |         |     RETN list-of-arg-values (1)
+    |         |   RETN list-of-arg-values (0 1)
+    |         | RETN apply 1
+    |         RETN eval 1
+    |       RETN eval ok
+    |       CALL force-it ok
+    |       RETN force-it ok
+    |     RETN actual-value ok
+    |     CALL eval-sequence (x) (((x thunk (...) ...)) ((...) (...) (...) (...) ...))
+    |       CALL eval x (((x thunk (id ...) ((...)))) ((...) (...) (...) (...) ...))
+    |       RETN eval (thunk (id 10) (((...) (...) (...) (...) (...) (...) (...) ...)))
+    |     RETN eval-sequence (thunk (id 10) (((...) (...) (...) (...) (...) ...)))
+    |   RETN eval-sequence (thunk (id 10) (((...) (...) (...) (...) (...) ...)))
+    | RETN apply (thunk (id 10) (((...) (...) (...) (...) (...) (...) (...) ...)))
+    RETN eval (thunk (id 10) (((...) (...) (...) (...) (...) (...) (...) ...)))
+  RETN eval ok
+  CALL force-it ok
+  RETN force-it ok
+RETN actual-value ok
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+count
+CALL actual-value count (((...) (...) (...) (...) (...) (...) (...) ...))
+  CALL eval count (((...) (...) (...) (...) (...) (...) (...) (...) (...) ...))
+  RETN eval 1
+  CALL force-it 1
+  RETN force-it 1
+RETN actual-value 1
+
+;;; L-Eval value:
+1
+
+;;; L-Eval input:
+w
+CALL actual-value w (((...) (...) (...) (...) (...) (...) (...) (...) ...))
+  CALL eval w (((...) (...) (...) (...) (...) (...) (...) (...) (...) ...))
+  RETN eval (thunk (id 10) (((...) (...) (...) (...) (...) (...) (...) ...)))
+  CALL force-it (thunk (id 10) (((...) (...) (...) (...) (...) (...) ...)))
+    CALL actual-value (id 10) (((...) (...) (...) (...) (...) (...) (...) ...))
+      CALL eval (id 10) (((...) (...) (...) (...) (...) (...) (...) (...) ...))
+        CALL actual-value id (((...) (...) (...) (...) (...) (...) (...) (...) ...))
+          CALL eval id (((...) (...) (...) (...) (...) (...) (...) (...) (...) ...))
+          RETN eval (procedure (x) ((set! ...) x) (((...) (...) (...) (...) ...)))
+          CALL force-it (procedure (x) ((set! ...) x) (((...) (...) (...) (...) ...)))
+          RETN force-it (procedure (x) ((set! ...) x) (((...) (...) (...) (...) ...)))
+        RETN actual-value (procedure (x) ((set! ...) ...) (((...) (...) (...) ...)))
+        CALL apply (procedure ...) (10) (((...) (...) (...) (...) (...) (...) ...))
+          CALL procedure-body (procedure (x) ((...) x) (((...) (...) (...) (...) ...)))
+          RETN procedure-body ((set! count (+ count ...)) x)
+          CALL procedure-parameters (procedure (x) ((...) ...) (((...) (...) ...)))
+          RETN procedure-parameters (x)
+          CALL list-of-delayed-args (10) (((...) (...) (...) (...) (...) (...) ...))
+            CALL delay-it 10 (((...) (...) (...) (...) (...) (...) (...) (...) ...))
+            RETN delay-it (thunk 10 (((...) (...) (...) (...) (...) (...) (...) ...)))
+            CALL list-of-delayed-args () (((...) (...) (...) (...) (...) (...) ...))
+            RETN list-of-delayed-args ()
+          RETN list-of-delayed-args ((thunk 10 (((...) (...) (...) (...) (...) ...))))
+          CALL eval-sequence ((set! ...) x) (((x thunk ...)) ((...) (...) (...) ...))
+            CALL actual-value (set! count (+ count ...)) (((x ...)) ((...) (...) ...))
+              CALL eval (set! count (+ count 1)) (((x thunk ...)) ((...) (...) (...) ...))
+                CALL eval (+ count 1) (((x thunk 10 (((...) ...)))) ((...) (...) (...) ...))
+                  CALL actual-value + (((x thunk 10 (((...) ...)))) ((...) (...) (...) ...))
+                    CALL eval + (((x thunk 10 (((...) ...)))) ((...) (...) (...) (...) ...))
+                    RETN eval (primitive #[proc])
+                    CALL force-it (primitive #[proc])
+                    RETN force-it (primitive #[proc])
+                  RETN actual-value (primitive #[proc])
+                  CALL apply (primitive ...) (count 1) (((x thunk ...)) ((...) (...) ...))
+                    CALL list-of-arg-values (count 1) (((x thunk ...)) ((...) (...) (...) ...))
+                      CALL actual-value count (((x thunk 10 ((...)))) ((...) (...) (...) ...))
+                        CALL eval count (((x thunk 10 (((...) ...)))) ((...) (...) (...) (...) ...))
+                        RETN eval 1
+                        CALL force-it 1
+                        RETN force-it 1
+                      RETN actual-value 1
+                      CALL list-of-arg-values (1) (((x thunk 10 ...)) ((...) (...) (...) ...))
+                        CALL actual-value 1 (((x thunk 10 (((...) ...)))) ((...) (...) (...) ...))
+                          CALL eval 1 (((x thunk 10 (((...) ...)))) ((...) (...) (...) (...) ...))
+                          RETN eval 1
+                          CALL force-it 1
+                          RETN force-it 1
+                        RETN actual-value 1
+                        CALL list-of-arg-values () (((x thunk 10 ...)) ((...) (...) (...) (...) ...))
+                        RETN list-of-arg-values ()
+                      RETN list-of-arg-values (1)
+                    RETN list-of-arg-values (1 1)
+                  RETN apply 2
+                RETN eval 2
+              RETN eval ok
+              CALL force-it ok
+              RETN force-it ok
+            RETN actual-value ok
+            CALL eval-sequence (x) (((x thunk 10 (((...) ...)))) ((...) (...) (...) ...))
+              CALL eval x (((x thunk 10 (((...) ...)))) ((...) (...) (...) (...) ...))
+              RETN eval (thunk 10 (((...) (...) (...) (...) (...) (...) (...) (...) ...)))
+            RETN eval-sequence (thunk 10 (((...) (...) (...) (...) (...) (...) ...)))
+          RETN eval-sequence (thunk 10 (((...) (...) (...) (...) (...) (...) ...)))
+        RETN apply (thunk 10 (((...) (...) (...) (...) (...) (...) (...) (...) ...)))
+      RETN eval (thunk 10 (((...) (...) (...) (...) (...) (...) (...) (...) ...)))
+      CALL force-it (thunk 10 (((...) (...) (...) (...) (...) (...) (...) ...)))
+        CALL actual-value 10 (((...) (...) (...) (...) (...) (...) (...) (...) ...))
+          CALL eval 10 (((...) (...) (...) (...) (...) (...) (...) (...) (...) ...))
+          RETN eval 10
+          CALL force-it 10
+          RETN force-it 10
+        RETN actual-value 10
+      RETN force-it 10
+    RETN actual-value 10
+  RETN force-it 10
+RETN actual-value 10
+
+;;; L-Eval value:
+10
+
+;;; L-Eval input:
+count
+CALL actual-value count (((...) (...) (...) (...) (...) (...) (...) ...))
+  CALL eval count (((...) (...) (...) (...) (...) (...) (...) (...) (...) ...))
+  RETN eval 2
+  CALL force-it 2
+  RETN force-it 2
+RETN actual-value 2
+
+;;; L-Eval value:
+2
+
+;;; L-Eval input:
+

@@ -1,0 +1,20 @@
+If `(parse-word verbs)' does not work, the amb tries `(list 'verb-phrase
+(parse-verb-phrase) ..)'.  This means `(parse-verb-phrase)' is called again,
+and again,.... to infinite loop:
+Even if the order was exchanged, it will still fall into the infinite loop. 
+(define (parse-verb-phrase)
+  (amb
+    (parse-word verbs)
+    (list 'verb-phrase
+      (parse-verb-phrase)
+      (parse-prepositional-phrase))))
+
+
+In the following case, `maybe-extend' will not be called if `(parse-word
+verbs)' is failed(no verbs).
+(define (parse-verb-phrase)
+  (define (maybe-extend verb-phrase)
+    (amb verb-phrase
+      (maybe-extend
+        (list 'verb-phrase verb-phrase (parse-prepositional-phrase)))))
+  (maybe-extend (parse-word verbs)))

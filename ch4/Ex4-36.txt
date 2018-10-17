@@ -1,0 +1,199 @@
+The reason that just using `an-integer-starting-from' does not work is because it enters into infinite loop when it's called at the end, in this case, for variable `k', the inner-most loop.
+
+
+Solution 1:
+;; solution 1
+(define (a-pythagorean-triple-from init)
+  (let ((i (an-integer-starting-from init)))
+    (let ((j (an-integer-between init i)))
+      (require (>= i j))
+      (let ((k (an-integer-between j i)))
+        (require
+            (= (+ (* k k) (* j j)) (* i i)))
+        (list j k i)))))
+
+;; Execution
+;; [/Users/yoshi/gith/sicp/ch4%] rlwrap gosh
+;; (load "./repl-amb") (amb-run)
+;; 
+;; (define (require p) (if (not p) (amb)))
+;; 
+;; (define (an-integer-starting-from n)
+;;   (amb n (an-integer-starting-from (+ n 1))))
+;; 
+;; (define (an-integer-between low high)
+;;   (require (< low high))
+;;   (amb low (an-integer-between (+ 1 low) high)))
+;; #t
+;; gosh>
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; ;; solution 1
+;; (define (a-pythagorean-triple-from init)
+;;   (let ((i (an-integer-starting-from init)))
+;;     (let ((j (an-integer-between init i)))
+;;       (require (>= i j))
+;;       (let ((k (an-integer-between j i)))
+;;         (require
+;;             (= (+ (* k k) (* j j)) (* i i)))
+;;         (list j k i)))))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (a-pythagorean-triple-from  1)
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (3 4 5)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (6 8 10)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (5 12 13)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (9 12 15)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (8 15 17)
+
+
+Solution 2
+(define (a-pythagorean-triple-from init)
+  (let ((i (an-integer-starting-from init)))
+    (let ((j (an-integer-upto i)))
+      (let ((k (an-integer-upto i)))
+        (require (>= j k))
+        (require (>= i j))
+        (require
+            (= (+ (* k k) (* j j)) (* i i)))
+        (list k j i)))))
+
+Execution:
+;; (load "./repl-amb") (amb-run)
+;; 
+;; (define (require p) (if (not p) (amb)))
+;; 
+;; (define (an-integer-starting-from n)
+;;   (amb n (an-integer-starting-from (+ n 1))))
+;; 
+;; (define (an-integer-between low high)
+;;   (require (< low high))
+;;   (amb low (an-integer-between (+ 1 low) high)))
+;; 
+;; (define (an-integer-upto n)
+;;   (require (> n 0))
+;;   (amb n (an-integer-upto (- n 1))))
+;; 
+;; ;; solution 2
+;; (define (a-pythagorean-triple-from init)
+;;   (let ((i (an-integer-starting-from init)))
+;;     (let ((j (an-integer-upto i)))
+;;       (let ((k (an-integer-upto i)))
+;; #t
+;; gosh>
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;;         (require (>= j k))
+;;         (require (>= i j))
+;;         (require
+;;             (= (+ (* k k) (* j j)) (* i i)))
+;;         (list k j i)))))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (a-pythagorean-triple-from  1)
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (3 4 5)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (6 8 10)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (5 12 13)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (9 12 15)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (8 15 17)
+;; 
+;; ;;; Amb-Eval input:
+;; 

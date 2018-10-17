@@ -1,0 +1,22 @@
++; unless->if
++;(unless predicate exceptional-value usual-value)
++(define (unless? exp) (tagged-list? exp 'unless))
++(define (unless-predicate exp) (cadr exp))
++(define (unless-exceptional-value exp) (caddr exp))
++(define (unless-usual-value exp)
++  (if
++    (null? (cdddr exp))
++    'false
++    (cadddr exp)))
+
+
++(define (unless->if exp)
++  (make-if
++    (unless-predicate exp)
++    (unless-usual-value exp)
++    (unless-exceptional-value exp)))
++
++    ((unless? exp) (eval (unless->if exp) env))
+
+If unless is a procedure, we can use it as a value for higher order functions.
+

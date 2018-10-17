@@ -1,0 +1,38 @@
+             (error "ELSE clause isn't last: COND_IF" clauses))
+           (make-if
+             (cond-predicate first)
+-            (sequence->exp (cond-actions first))
++            (let
++              ((first-cond-predicate (cond-predicate first))
++               (first-cond-actions (cond-actions first)))
++              (if
++                (eq? (car first-cond-actions) '=>)
++                ;; this 'list' is the crucial point
++                (list (cadr first-cond-actions) first-cond-predicate)
++                (sequence->exp first-cond-actions)))
+             (expand-clauses rest))))))
+ 
+ ; let->combination
+@@ -327,6 +335,11 @@
+     (list 'car car)
+     (list 'cdr cdr)
+     (list 'cons cons)
++    (list 'cadr cadr)
++    (list '+ +)
++    (list '* *)
++    (list '/ /)
++    (list 'assoc assoc)
+     (list 'null? null?)))
+
+:; ;; Execution
+:; [/Users/yoshi/gith/giggle/sicp/ch4%] rlwrap gosh
+:; gosh> (load "./repl")
+:; 
+:; 
+:; ::: M-Eval input:
+:; ((lambda (k) (cond ((assoc k '((a 5) (b 6))) => cadr) (else 22))) 'a)
+:; 
+:; ;;; M-Eval value:
+:; 5
+
+ 

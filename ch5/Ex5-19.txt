@@ -1,0 +1,82 @@
+Following is partial solution (not implementing cancel-breakpoint/cancel-all-breakpoint):
+
+diff --git a/ch5/machine2.scm b/ch5/machine2.scm
+index 9fb9245..1dc3bad 100644
+--- a/ch5/machine2.scm
++++ b/ch5/machine2.scm
+@@ -129,7 +129,13 @@
+ 					(if (null? insts)
+ 						'done
+ 						(begin
+-							((instruction-execution-proc (car insts)))
++              (print "(car insts):" (car insts))
++              (if (eq? (caaar insts) 'break-point)
++                (begin
++                  (print "break-point: " (caar insts))
++                  (advance-pc pc)
++                  'exit)
++							  ((instruction-execution-proc (car insts))))
+               (if (not (eq? (caaar insts) 'last-label))
+                   (set! instruction-counter (+ instruction-counter 1)))
+               ;; Ex5-17
+@@ -139,16 +145,38 @@
+                 (begin
+                 (print "last label: " last-label "    instruction: " (caar insts) )
+                 ))
+-							(execute)))))
++              (if
++                (eq? (caaar insts) 'break-point)
++                'exit-break-point
++							  (execute))))))
+       ;; Ex 5-18
+       (define (register-trace-on name)
+         ((lookup-register name) 'trace-on))
+       (define (register-trace-off name)
+         ((lookup-register name) 'trace-off))
++
++      ;; Ex 5-19
++      (define (set-break-point label n)
++        (set! the-instruction-sequence (set-break-point-in the-instruction-sequence label #f n n)))
++      (define (set-break-point-in all-instructions label is-after-label n cnt)
++        (if (eq? all-instructions '())
++          '()
++          (if (= cnt 0)
++               (cons (cons (list 'break-point label n) (lambda () 'break-point))
++                     (set-break-point-in all-instructions label #t n (- cnt 1)))
++               (begin
++               (if is-after-label (set! cnt (- cnt 1)))
++               (if (eq? (cadar (car all-instructions)) label) (set! is-after-label #t))
++               (print "cnt:" cnt " is-after-label:" is-after-label "  " (car all-instructions))
++               (cons
++                 (car all-instructions)
++                 (set-break-point-in (cdr all-instructions) label is-after-label n cnt))))))
++
+ 			(define (dispatch message)
+ 				(cond ((eq? message 'start)
+ 								(set-contents! pc the-instruction-sequence)
+ 								(execute))
++							((eq? message 'proceed) (execute))
+ 							((eq? message 'install-instruction-sequence)
+ 								(lambda (seq)
+ 									(set! the-instruction-sequence seq)))
+@@ -182,10 +210,12 @@
+               ;; Ex5-18
+               ((eq? message 'trace-register-on) register-trace-on)
+               ((eq? message 'trace-register-off) register-trace-off)
++              ((eq? message 'set-break-point) set-break-point)
+ 							(else (error "Unknown request: MACHINE" message))))
+ 			dispatch)))
+ 
+ (define (start machine) (machine 'start))
++(define (proceed machine) (machine 'proceed))
+ (define (get-register-contents machine register-name)
+ 	(get-contents (get-register machine register-name)))
+ (define (set-register-contents! machine register-name value)
+@@ -358,6 +388,7 @@
+ (define (stack-inst-reg-name stack-instruction)
+   (cadr stack-instruction))
+ 
++
+ (define (make-perform inst machine labels operations pc)
+   (let ((action (perform-action inst)))
+     (if (operation-exp? action)

@@ -1,0 +1,52 @@
+;; Half cooked solution.
+(define (text-of-quotation exp env)
+  (let ((text (cadr exp)))
+      (if
+        (pair? text)
+        (eval (make-list text) env)
+        text)))
+
+(define (make-list text)
+  (if (null? text) '()
+      (list 'cons (list 'quote (car text)) (make-list (cdr text)))))
+  
+
+;; Execution
+;; ;;; L-Eval input:
+;; 
+;; (cdr '(1 2 3))
+;; 
+;; ;;; L-Eval value:
+;; (compount-procedure (m) ((m x y)) <procedure-env>)
+;; 
+;; ;;; L-Eval input:
+;; (car '(1 2 3))
+;; 
+;; ;;; L-Eval value:
+;; 1
+;; 
+;; ;;; L-Eval input:
+;; (cons 1 (list 2 3))
+;; 
+;; ;;; L-Eval value:
+;; (compount-procedure (m) ((m x y)) <procedure-env>)
+;; 
+;; ;;; L-Eval input:
+;; (car (cons 1 (list 2 3)))
+;; 
+;; ;;; L-Eval value:
+;; 1
+;; 
+;; ;;; L-Eval input:
+;; (cdr (cons 1 (list 2 3)))
+;; 
+;; ;;; L-Eval value:
+;; (2 3)
+;; 
+;; ;;; L-Eval input:
+;; (cdr (cons '1 '(2 3)))
+;; 
+;; ;;; L-Eval value:
+;; (compount-procedure (m) ((m x y)) <procedure-env>)
+;; 
+;; 

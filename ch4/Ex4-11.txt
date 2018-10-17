@@ -1,0 +1,70 @@
+;; Changed following functions
+;;
+;; following does not change the contents of 'from' in terms of caller's point.
+;; So I needed to use set-car! or set-cdr!
+;; (define (somefunction frame)
+;;   (set! frame (cons var frame)))
+;;
+
+(define (eval-definition exp env)
+  (define-variable! (definition-variable exp)
+                    (eval (definition-value exp) env)
+                    env)
+  'ok)
+
+(define (make-frame variables values)
+  (if
+    (null? variables) '()
+    (cons
+      (cons (car variables) (car values))
+      (make-frame (cdr variables) (cdr values)))))
+
+(define (add-binding-to-frame! var val frame)
+  (if
+    (null? (cdr frame))
+    (set-cdr! frame (list (cons var val)))
+    (add-binding-to-frame! var val (cdr frame))))
+
+(define (lookup-variable-value var env)
+  (define (env-loop env)
+    (define (scan in-frame)
+      (cond
+        ((null? in-frame) (env-loop (enclosing-environment env)))
+        ((eq? var (car (car in-frame))) (cdr (car in-frame)))
+        (else (scan (cdr in-frame)))))
+    (if
+      (eq? env the-empty-environment) (error "Unbound variable" var)
+      (let
+        ((frame (first-frame env)))
+        (scan frame))))
+  (env-loop env))
+
+(define (set-variable-value! var val env)
+  (define (env-loop env)
+    (define (scan in-frame)
+      (cond
+        ((null? in-frame) (env-loop (enclosing-environment env)))
+        ((eq? var (car (car in-frame))) (set-cdr! (car in-frame) val))
+        (else (scan (cdr in-frame)))))
+    (if
+      (eq? env the-empty-environment) (error "Unbound variable: SET!" var)
+      (let
+        ((frame (first-frame env)))
+        (scan frame))))
+  (env-loop env))
+
+
+(define (define-variable! var val env)
+  (let
+    ((frame (first-frame env)))
+      (define (scan in-frame)
+        (cond
+          ((null? in-frame) (add-binding-to-frame! var val frame))
+          ((eq? var (get-var (car in-frame))) (set-cdr! (cdr in-frame) val))
+          (else
+            (scan (cdr in-frame)))))
+      (scan frame)))
+(define (get-var elem) (car elem))
+(define (get-val elem) (cdr elem))
+
+

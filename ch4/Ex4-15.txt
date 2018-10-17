@@ -1,0 +1,3 @@
+If (halts? try try) is false(it won't stop), it will stop.
+This is a contradiction.
+

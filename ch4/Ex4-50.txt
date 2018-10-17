@@ -1,0 +1,1760 @@
+(define (ramb? exp) (tagged-list? exp 'ramb))
+(define (ramb-choices exp) (cdr exp))
+
+(define (analyze-ramb exp)
+  (let ((cprocs (map analyze (ramb-choices exp))))
+    (lambda (env succeed fail)
+      (define (try-next choices)
+        (if
+          (null? choices)
+          (fail)
+          ((list-ref choices (random-integer (length choices)))
+           env
+           succeed
+           (lambda () (try-next (cdr choices))))))
+       (try-next cprocs))))
+
+Execution:
+;; (load "./repl-amb")
+;; 
+;; (amb-run)
+;; 
+;; #t
+;; gosh>
+;; 
+;; ;;; Amb-Eval input:
+;; (ramb 1 2 3)
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; 3
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; 2
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; 3
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; There are no more values of
+;; (ramb 1 2 3)
+;; 
+;; ;;; Amb-Eval input:
+;; (ramb 1 2 3)
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; 3
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; 3
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; 3
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; There are no more values of
+;; (ramb 1 2 3)
+;; 
+;; ;;; Amb-Eval input:
+;; 
+
+
+
+;; ;;; Amb-Eval input:
+;; (define nouns '(noun student professor cat class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; (define verbs '(verb studies lectures eats sleeps))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; (define articles '(article the a))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; (define prepositions '(prep for to in by with))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (define (parse-sentence)
+;;   (list 'sentence
+;;         (parse-noun-phrase)
+;;         (parse-verb-phrase)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (define (parse-simple-noun-phrase)
+;;   (list 'simple-noun-phrase
+;;     (parse-word articles)
+;;     (parse-word nouns)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (define (parse-noun-phrase)
+;;   (define (maybe-extend noun-phrase)
+;;     (ramb noun-phrase
+;;         (maybe-extend
+;;           (list 'noun-phrase noun-phrase (parse-prepositional-phrase)))))
+;;   (maybe-extend (parse-simple-noun-phrase)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; 
+;; 
+;; (define (parse-word word-list)
+;;   ;; without this part, the program falls into infinite loop
+;;   (require (not (null? *unparsed*)))
+;;   (require (memq (car *unparsed*) (cdr word-list)))
+;;   (let ((found-word (car *unparsed*)))
+;;     (set! *unparsed* (cdr *unparsed*)))
+;;   (define (try-all list)
+;;     (require (not (null? list)))
+;;     (ramb (car list) (try-all (cdr list))))
+;;   (try-all (cdr word-list)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (define (parse-prepositional-phrase)
+;;   (list 'prep-phrase
+;;     (parse-word prepositions)
+;;     (parse-noun-phrase)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; 
+;; (define (parse-verb-phrase)
+;;   (define (maybe-extend verb-phrase)
+;;     (ramb verb-phrase
+;;       (maybe-extend
+;;         (list 'verb-phrase verb-phrase (parse-prepositional-phrase)))))
+;;   (maybe-extend (parse-word verbs)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (define *unparsed* '())
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; (define (parse input)
+;;   (set! *unparsed* input)
+;;   (let ((sent (parse-sentence)))
+;;     (require (null? *unparsed*))
+;;     sent))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (parse '(the cat eats))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the class) lectures)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the cat) eats)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the cat) sleeps)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (simple-noun-phrase the cat) sleeps)
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; There are no more values of
+;; (parse '(the cat eats))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase lectures (prep-phrase in (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase lectures (prep-phrase in (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase lectures (prep-phrase in (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase lectures (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase to (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase in (simple-noun-phrase the student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase in (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase in (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase in (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase lectures (prep-phrase for (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase lectures (prep-phrase to (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase lectures (prep-phrase to (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase lectures (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase to (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase to (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase with (simple-noun-phrase the student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase with (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase to (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase by (simple-noun-phrase the student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase by (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase by (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase in (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase by (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase to (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase in (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase in (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase for (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase for (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase for (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase for (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase by (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase by (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase with (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase with (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase with (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase in (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase in (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase in (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase to (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase to (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase to (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase for (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the class))) (verb-phrase eats (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase to (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase to (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase in (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase in (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase lectures (prep-phrase in (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase lectures (prep-phrase with (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase lectures (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase lectures (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase to (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase in (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase to (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase by (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase eats (prep-phrase with (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase for (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase for (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase the student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase for (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase the student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase studies (prep-phrase for (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase studies (prep-phrase by (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase studies (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase studies (prep-phrase by (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase studies (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase for (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase for (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase for (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase to (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase for (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase for (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase the student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase by (simple-noun-phrase a professor))) (verb-phrase sleeps (prep-phrase with (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase a class))) (verb-phrase eats (prep-phrase to (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase for (simple-noun-phrase the cat))) (verb-phrase sleeps (prep-phrase in (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase the cat) (prep-phrase for (simple-noun-phrase a cat))) (verb-phrase sleeps (prep-phrase by (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; There are no more values of
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; There are no more values of
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase to (simple-noun-phrase the student))) (verb-phrase studies (prep-phrase for (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; There are no more values of
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a student) (prep-phrase in (simple-noun-phrase a class))) (verb-phrase eats (prep-phrase in (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; There are no more values of
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase the student) (prep-phrase for (simple-noun-phrase a class))) (verb-phrase sleeps (prep-phrase for (simple-noun-phrase a student))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a professor) (prep-phrase for (simple-noun-phrase a class))) (verb-phrase studies (prep-phrase for (simple-noun-phrase a professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a cat) (prep-phrase for (simple-noun-phrase the class))) (verb-phrase lectures (prep-phrase with (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; There are no more values of
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase the student) (prep-phrase for (simple-noun-phrase a class))) (verb-phrase lectures (prep-phrase for (simple-noun-phrase a cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase the cat) (prep-phrase in (simple-noun-phrase the class))) (verb-phrase studies (prep-phrase by (simple-noun-phrase the class))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase the professor) (prep-phrase in (simple-noun-phrase a cat))) (verb-phrase sleeps (prep-phrase for (simple-noun-phrase a class))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; There are no more values of
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase the class) (prep-phrase in (simple-noun-phrase the professor))) (verb-phrase sleeps (prep-phrase for (simple-noun-phrase the cat))))
+;; 
+;; ;;; Amb-Eval input:
+;; (parse '(the student with the cat sleeps in the class))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (noun-phrase (simple-noun-phrase a class) (prep-phrase in (simple-noun-phrase a student))) (verb-phrase lectures (prep-phrase for (simple-noun-phrase the professor))))
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; 

@@ -1,0 +1,205 @@
+(define (dyf)
+  (let ((moor-d (amb 'mary))
+        (barnacle-d (amb 'melissa))
+        (hall-d (amb 'lorna 'rosalind 'gabrielle))
+        (colonel-d (amb 'lorna 'rosalind 'gabrielle))
+        (parker-d (amb 'lorna 'rosalind 'gabrielle)))
+    (require
+      (and
+        (or ;; This expresses the extra condition 'Gabrielle’s father owns the
+            ;; yacht that is named after Dr. Parker’s daughter.
+            ;; Therefore, this includes information Father-yacht relationship.
+          (and (eq? colonel-d 'gabrielle) (eq? parker-d 'melissa))
+          (and (eq? hall-d 'gabrielle) (eq? parker-d 'rosalind))
+          (and (eq? parker-d 'gabrielle) (eq? parker-d 'melissa)))
+        (distinct? (list moor-d hall-d colonel-d parker-d barnacle-d))))
+    (list 
+      (list 'parker-d parker-d)
+      (list 'moor-d moor-d)
+      (list 'hall-d hall-d)
+      (list 'colonel-d colonel-d)
+      (list 'barnacle-d barnacle-d)
+      )))
+
+Execution:
+;; (load "./repl-amb")
+;; (amb-run)
+;; 
+;; (define (require p)
+;;   (if (not p) (amb)))
+;; 
+;; (define (distinct? items)
+;;   (cond ((null? items) true)
+;;     ((null? (cdr items)) true)
+;;     ((member (car items) (cdr items)) false)
+;;     (else (distinct? (cdr items)))))
+;; 
+;; (define (dyf)
+;;   (let ((moor-d (amb 'mary))
+;;         (barnacle-d (amb 'melissa))
+;;         (hall-d (amb 'lorna 'rosalind 'gabrielle))
+;;         (colonel-d (amb 'lorna 'rosalind 'gabrielle))
+;;         (parker-d (amb 'lorna 'rosalind 'gabrielle)))
+;;     (require
+;;       (and
+;; #t
+;; gosh>
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;;         (or
+;;           (and (eq? colonel-d 'gabrielle) (eq? parker-d 'melissa))
+;;           (and (eq? hall-d 'gabrielle) (eq? parker-d 'rosalind))
+;;           (and (eq? parker-d 'gabrielle) (eq? parker-d 'melissa)))
+;;         (distinct? (list moor-d hall-d colonel-d parker-d barnacle-d))))
+;;     (list
+;;       (list 'parker-d parker-d)
+;;       (list 'moor-d moor-d)
+;;       (list 'hall-d hall-d)
+;;       (list 'colonel-d colonel-d)
+;;       (list 'barnacle-d barnacle-d)
+;;       )))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; (dyf)
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ((parker-d rosalind) (moor-d mary) (hall-d gabrielle) (colonel-d lorna) (barnacle-d melissa))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; There are no more values of
+;; (dyf)
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; 
+
+
+If we are not told that Mary Ann’s last name is Moore, there are 2 solutions.
+(define (dyf)
+  (let ((moor-d (amb 'lorna 'rosalind 'gabrielle 'mary))
+        (barnacle-d (amb 'melissa))
+        (hall-d (amb 'lorna 'rosalind 'gabrielle 'mary))
+        (colonel-d (amb 'lorna 'rosalind 'gabrielle 'mary))
+        (parker-d (amb 'lorna 'rosalind 'gabrielle 'mary)))
+    (require
+      (and
+        (or
+          (and (eq? colonel-d 'gabrielle) (eq? parker-d 'melissa))
+          (and (eq? hall-d 'gabrielle) (eq? parker-d 'rosalind))
+          (and (eq? moor-d 'gabrielle) (eq? parker-d 'lorna))
+          (and (eq? parker-d 'gabrielle) (eq? parker-d 'melissa)))
+        (distinct? (list moor-d hall-d colonel-d parker-d barnacle-d))
+        (not (eq? barnacle-d 'gabrielle))
+        (not (eq? moor-d 'lorna))
+        (not (eq? hall-d 'rosalind))
+        (not (eq? colonel-d 'melissa))))  
+    (list 
+      (list 'parker-d parker-d)
+      (list 'moor-d moor-d)
+      (list 'hall-d hall-d)
+      (list 'colonel-d colonel-d)
+      (list 'barnacle-d barnacle-d)
+      )))
+
+Execution:
+[/Users/yoshi/gith/sicp/ch4%] rlwrap gosh                                                                                                                                                        *[master]
+(load "./repl-amb")
+(amb-run)
+
+(define (require p)
+  (if (not p) (amb)))
+
+(define (distinct? items)
+  (cond ((null? items) true)
+    ((null? (cdr items)) true)
+    ((member (car items) (cdr items)) false)
+    (else (distinct? (cdr items)))))
+
+
+#t
+gosh>
+
+;;; Amb-Eval input:
+
+;;; Starting a new problem
+;;; Amb-Eval value:
+ok
+
+;;; Amb-Eval input:
+
+;;; Starting a new problem
+;;; Amb-Eval value:
+ok
+
+;;; Amb-Eval input:
+(define (dyf)
+  (let ((moor-d (amb 'lorna 'rosalind 'gabrielle 'mary))
+        (barnacle-d (amb 'melissa))
+        (hall-d (amb 'lorna 'rosalind 'gabrielle 'mary))
+        (colonel-d (amb 'lorna 'rosalind 'gabrielle 'mary))
+        (parker-d (amb 'lorna 'rosalind 'gabrielle 'mary)))
+    (require
+      (and
+        (or
+          (and (eq? colonel-d 'gabrielle) (eq? parker-d 'melissa))
+          (and (eq? hall-d 'gabrielle) (eq? parker-d 'rosalind))
+          (and (eq? moor-d 'gabrielle) (eq? parker-d 'lorna))
+          (and (eq? parker-d 'gabrielle) (eq? parker-d 'melissa)))
+        (distinct? (list moor-d hall-d colonel-d parker-d barnacle-d))
+        (not (eq? barnacle-d 'gabrielle))
+        (not (eq? moor-d 'lorna))
+        (not (eq? hall-d 'rosalind))
+        (not (eq? colonel-d 'melissa))))
+    (list
+      (list 'parker-d parker-d)
+      (list 'moor-d moor-d)
+      (list 'hall-d hall-d)
+      (list 'colonel-d colonel-d)
+      (list 'barnacle-d barnacle-d)
+      )))
+
+;;; Starting a new problem
+;;; Amb-Eval value:
+ok
+
+;;; Amb-Eval input:
+(dyf)
+
+;;; Starting a new problem
+;;; Amb-Eval value:
+((parker-d lorna) (moor-d gabrielle) (hall-d mary) (colonel-d rosalind) (barnacle-d melissa))
+
+;;; Amb-Eval input:
+try-again
+
+;;; Amb-Eval value:
+((parker-d rosalind) (moor-d mary) (hall-d gabrielle) (colonel-d lorna) (barnacle-d melissa))
+
+;;; Amb-Eval input:
+try-again
+
+;;; There are no more values of
+(dyf)
+
+;;; Amb-Eval input:
+
+

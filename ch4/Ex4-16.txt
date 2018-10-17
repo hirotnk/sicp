@@ -1,0 +1,58 @@
+(define (make-procedure parameters body env)
+  (list 'procedure parameters (scan-out-defines body) env))
+
+(define (scan-out-defines body)
+  (define (get-body def) (list (last def)))
+  (let
+    ;; Here, it can be definition of variable, or function
+    ;; Use definition-variable/definition-value
+    ((def-names (get-defcontents body definition-variable))
+     (def-bodies (get-defcontents body definition-value)))
+    (if
+      (> (length def-names) 0)
+      (list
+        (append
+          (append
+            (list 'let
+              (map
+                (lambda (defname) (list defname (quote '*unassigned*)))
+                def-names))
+            (map
+              (lambda (pair) (list 'set! (car pair) (cadr pair)))
+              (zip def-names def-bodies))) ; Pair of (defname, defvalue)
+        (get-body body)))
+      body)))
+
+(define (get-defcontents body fn)
+  (fold
+    (lambda (element acc) (if (definition? element) (cons (fn element) acc) acc))
+    '() body))
+
+
+;; in lookup-variable..
+(define (lookup-variable-value var env)
+  (if
+    (eq? env the-empty-environment) (error "Unbound variable" var)
+    (env-loop var env (lambda (x) (cdr x)) 'lookup)))
+
+(define (set-variable-value! var val env)
+  (if
+    (eq? env the-empty-environment) (error "Unbound variable: SET!" var)
+    (env-loop var env (lambda (x) (set-cdr! x val)) 'set)))
+
+(define (env-loop var in-env func op)
+  (if
+    (eq? in-env the-empty-environment)
+    (error "Env-loop: Unbound variable?:" var)
+    (let
+      ; Retrieve the pair that matches 'var'
+      ((retval (assoc var (first-frame in-env))))
+      (cond
+        ; Not found. Check enclosing environment
+        ((eq? retval #f) (env-loop var (enclosing-environment in-env) func op))
+        ; Raise error if *unassigned* when looked up
+        ((and (pair? retval) (not (eq? op 'set)) (eq? (get-val retval) '*unassigned*))
+         (error "env-loop:Unassigned:" retval))
+        ; Apply operation to the pair
+        ((pair? retval) (func retval))))))
+

@@ -1,0 +1,69 @@
+In Gauche,
+
+gosh> (let ((a 1))
+        (define (f x)
+          (define b (+ a x)) ; <= 'a' is using internal def 5
+          (define a 5)
+          (+ a b))
+        (f 10))
+20
+gosh>
+
+###
+### Copied from :http://practical-scheme.net/gauche/man/gauche-refe_27.html
+###
+4.6 Binding constructs
+
+Special Form: let ((var expr) …) body …
+Special Form: let* ((var expr) …) body …
+Special Form: letrec ((var expr) …) body …
+Special Form: letrec* ((var expr) …) body …
+[R7RS] Creates a local scope where var … are bound to the value of expr …, then
+evaluates body …. vars must be symbols, and there shouldn’t be a duplication.
+The value(s) of the last expression of body … becomes the value(s) of this
+form.
+
+The four forms differ in terms of the scope and the order exprs are evaluated.
+Let evaluates exprs before (outside of) let form. The order of evaluation of
+exprs is undefined, and the compiler may reorder those exprs freely for
+optimization. Let* evaluates exprs, in the order they appears, and each expr is
+evaluated in the scope where vars before it are bound.
+
+Letrec evaluates exprs, in an undefined order, in the environment where vars
+are already bound (to an undefined value, initially). letrec is necessary to
+define mutually recursive local procedures. Finally, letrec* uses the same
+scope rule as letrec, and it evaluates expr in the order of appearance.
+
+  
+(define x 'top-x)
+
+(let  ((x 3) (y x)) (cons x y)) ⇒ (3 . top-x)
+(let* ((x 3) (y x)) (cons x y)) ⇒ (3 . 3)
+
+(let ((cons (lambda (a b) (+ a b)))
+      (list (lambda (a b) (cons a (cons b 0)))))
+  (list 1 2))  ⇒ (1 2 . 0)
+
+(letrec ((cons (lambda (a b) (+ a b)))
+         (list (lambda (a b) (cons a (cons b 0)))))
+  (list 1 2))  ⇒ 3
+You need to use letrec* if evaluation of one expr requires the value of var
+that appears before the expr. In the following example, calculating the value
+of a and b requires the value of cube, so you need letrec*. (Note the
+difference from the above example, where calculating the value of list doesn’t
+need to take the value of cons bound in the same letrec. The value of cons
+isn’t required until list is actually applied.)
+
+  
+(letrec* ((cube (lambda (x) (* x x x)))
+          (a (+ (cube 1) (cube 12)))
+          (b (+ (cube 9) (cube 10))))
+  (= a b)) ⇒ #t
+This example happens to work with letrec in the current Gauche, but it is not
+guaranteed to keep working in future. You just should not rely on evaluation
+order when you use letrec. In retrospect, it would be a lot simpler if we only
+have letrec*. Unfortunately letrec preceded for long time in Scheme history and
+it’s hard to remove that. Besides, letrec does have more opportunities to
+optimize than letrec*.
+
+

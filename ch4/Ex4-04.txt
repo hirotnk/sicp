@@ -1,0 +1,82 @@
+;;Note:
+;; It's not clear here whether #t or true as a variable should be used as
+;; boolean value.
+
+     ((assignment? exp) (eval-assignment exp env))
+     ((definition? exp) (eval-definition exp env))
+     ((if? exp) (eval-if exp env))
++    ((and? exp) (eval-and (and-body exp) env))
++    ((or? exp) (eval-or (or-body exp) env))
+     ((lambda? exp) (make-procedure
+                       (lambda-parameters exp)
+                       (lambda-body exp)
+ 
+;; and
+(define (and-body exp) (cdr exp))
+(define (eval-and exp env)
+  (define (eval-and-seq exp0 carry env)
+    (if
+      (null? exp0) carry
+      (let
+        ((result (eval (car exp0) env)))
+        (if
+          (false? result) #f
+            (eval-and-seq (cdr exp0) result env)))))
+  (eval-and-seq exp #t env))
+
+;; and->if (derived expression)
+(define (and->if exp)
+  (define (expand-and-clause exp carry)
+    (if
+      (null? exp) carry
+      (make-if
+        (car exp)
+        (expand-and-clause (cdr exp) (car exp))
+        'false)))
+  (expand-and-clause exp 'true))
+ 
+;; or
+(define (or-body exp) (cdr exp))
+(define (eval-or exp env)
+  (define (eval-or-seq exp0 carry env)
+    (if
+      (null? exp0) carry
+      (let
+        ((result (eval (car exp0) env)))
+        (if
+          (not (false? result)) result
+          (eval-or-seq (cdr exp0) result env)))))
+  (eval-or-seq exp #f env))
+
+ 
+;; or->if (derived expression)
+(define (or->if exp)
+  (define (expand-or-clause exp carry)
+    (if
+      (null? exp) carry
+      (make-if
+        (car exp)
+        (car exp)
+        (expand-or-clause (cdr exp) (car exp)))))
+  (expand-or-clause exp 'false))
+
+
+(define (boolan? exp)
+  (if (or (eq? exp #t) (eq? exp #f)) #t #f))
+
+
+ (define (self-evaluating? exp)
+   (cond
+     ((number? exp) #t)
+     ((string? exp) #t)
++    ((boolean? exp) #t)
+     (else #f)))
+ 
+(define (true? exp)
+  (if
+    (eq? exp #t) #t #f))
+(define (false? exp)
+  (if
+    (eq? exp #f) #t #f))
+
+

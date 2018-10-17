@@ -1,0 +1,107 @@
+@@ -21,6 +21,7 @@
+     ((quoted? exp) (text-of-quotation exp))
+     ((assignment? exp) (eval-assignment exp env))
+     ((definition? exp) (eval-definition exp env))
++    ((unbound? exp) (eval-unbound exp env))
+     ((if? exp) (eval-if exp env))
+     ((and? exp) (eval-and (and-body exp) env))
+     ((or? exp) (eval-or (or-body exp) env))
+@@ -34,6 +35,7 @@
+     ((let*? exp) (eval (let*->nested-lets exp) env))
+     ((for? exp) (eval (for->combination exp) env))
+     ((while? exp) (eval (while->combination exp) env))
++    ((print-env? exp) (print the-global-environment))
+     ((application? exp)
+       (apply
+         (eval (operator exp) env)
+ 
++(define (print-env? exp)
++  (tagged-list? exp 'printenv))
++
++(define (eval-unbound exp env)
++  (unbound-variable! (unbound-variable exp) env)
++  'ok)
++
+ 
++;; make-unbound!
++;; (make-unbound! <var>)
++(define (unbound? exp) (tagged-list? exp 'make-unbound!))
++(define (unbound-variable exp) (cadr exp))
++(define (unbound-variable! var env)
++  (define (get-var pair) (car pair))
++  (if
++    (eq? env the-empty-environment)
++    (error "Unbound-variable! - UNBOUND")
++    (let
++      ((new-frame
++        (remove
++          (lambda (pair) (eq? var (get-var pair)))
++          (first-frame env))))
++      (set-car! env new-frame))))
+
+;; Execution
+;; [/Users/yoshi/gith/giggle/sicp/ch4%] rlwrap gosh
+;; gosh> (load "./repl")
+;; #t
+;; gosh> (driver-loop)
+;; 
+;; 
+;; ::: M-Eval input:
+;; (define x 2)
+;; 
+;; ;;; M-Eval value:
+;; ok
+;; 
+;; ::: M-Eval input:
+;; (define (myfunc x) (* 3 x))
+;; 
+;; ;;; M-Eval value:
+;; ok
+;; 
+;; ::: M-Eval input:
+;; (myfunc x)
+;; 
+;; ;;; M-Eval value:
+;; 6
+;; 
+;; ::: M-Eval input:
+;; (printenv)
+;; #0=(((car primitive #<subr car>) (cdr primitive #<subr cdr>) (cons primitive #<subr cons>) (cadr primitive #<subr cadr>) (< primitive #<subr <>) (> primitive #<subr >>) (+ primitive #<subr +>) (- primitive #<subr ->) (* primitive #<subr *>) (/ primitive #<subr />) (= primitive #<subr =>) (print primitive #<closure print>) (map primitive #<closure map>) (assoc primitive #<closure assoc>) (null? primitive #<subr null?>) (true . #t) (false . #f) (x . 2) (myfunc procedure (x) ((* 3 x)) #0#)))
+;; 
+;; ;;; M-Eval value:
+;; #<undef>
+;; 
+;; ::: M-Eval input:
+;; (make-unbound! x)
+;; 
+;; ;;; M-Eval value:
+;; ok
+;; 
+;; ::: M-Eval input:
+;; (printenv)
+;; #0=(((car primitive #<subr car>) (cdr primitive #<subr cdr>) (cons primitive #<subr cons>) (cadr primitive #<subr cadr>) (< primitive #<subr <>) (> primitive #<subr >>) (+ primitive #<subr +>) (- primitive #<subr ->) (* primitive #<subr *>) (/ primitive #<subr />) (= primitive #<subr =>) (print primitive #<closure print>) (map primitive #<closure map>) (assoc primitive #<closure assoc>) (null? primitive #<subr null?>) (true . #t) (false . #f) (myfunc procedure (x) ((* 3 x)) #0#)))
+;; 
+;; ;;; M-Eval value:
+;; #<undef>
+;; 
+;; ::: M-Eval input:
+;; (myfunc 1)
+;; 
+;; ;;; M-Eval value:
+;; 3
+;; 
+;; ::: M-Eval input:
+;; (myfunc x)
+;; *** ERROR: Env-loop: Unbound variable?: x
+;; Stack Trace:
+;; _______________________________________
+;;   0  (eval (first-operand exps) env)
+;;         At line 54 of "./repl.scm"
+;;   1  (list-of-values (operands exp) env)
+;;         At line 42 of "./repl.scm"
+;;   2  (eval input the-global-environment)
+;;         At line 486 of "./repl.scm"
+;;   3  (eval expr env)
+;;         At line 179 of "/usr/local/Cellar/gauche/0.9.4/share/gauche-0.9/0.9.4/lib/gauche/interactive.scm"
+;; gosh>
+;; 

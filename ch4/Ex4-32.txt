@@ -1,0 +1,65 @@
+Both car/cdr are delayed:
+
+[/Users/yoshi/gith/sicp/ch4%] rlwrap gosh
+gosh> (load "./repl-lazy")
+#t
+gosh> (run)
+
+
+;;; L-Eval input:
+(define (cons x y) (lambda (m) (m x y)))
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(define (car z) (z (lambda (p q) p)))
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(define (cdr z) (z (lambda (p q) q)))
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(define z (cons x y))   ; <- x and y are not defined yet.
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(define x 1)
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+(define y 2)
+
+;;; L-Eval value:
+ok
+
+;;; L-Eval input:
+z
+
+;;; L-Eval value:
+(compount-procedure (m) ((m x y)) <procedure-env>)
+
+;;; L-Eval input:
+(car z)
+
+;;; L-Eval value:
+1
+
+;;; L-Eval input:
+(cdr z)
+
+;;; L-Eval value:
+2
+
+;;; L-Eval input:
+
+

@@ -1,0 +1,104 @@
+((lambda (n)
+  ((lambda (fact) (fact fact n))
+   (lambda (ft k) (if (= k 1) 1 (* k (ft ft (- k 1)))))))
+10)
+
+is:
+
+func1(n) -> func2(funcN)       // func2 and funcN is visible
+func2(funcN) -> funcN(funcN n) // n is visible
+                               // note that funcN is passing itself so that it can call that function (in this case itself) inside it
+funcN(funcM, k) -> if (= k 1) 1 (* k funcM(funcM (- k 1)))
+
+then calling func1 (10)
+
+
+with the same logic:
+(define (f x)
+  (
+    (lambda (even? odd?) (even? even? odd? x)) ;; this function takes 2 arguments and fall first function, passing first fun, second fun, and x
+                                               ;; then in order to call 'odd' function (second argument) with arguments (ev? od? n),
+                                               ;; you need to pass ev?, od? and (- n 1) in this order
+                                               ;; then calling ev? function inside od?, you need to pass still ev?, od? and (- n 1) in this order
+                                               ;; the gist is, in this example, both has exactly same parameters.
+      (lambda (ev? od? n) (if (= n 0) 'true (od? ev? od? (- n 1))))    ;; first argument
+      (lambda (ev? od? n) (if (= n 0) 'false (ev? ev? od? (- n 1)))))  ;; second argument
+)
+
+;; Execution
+; (define (f x)
+;   (
+;     (lambda (even? odd?) (even? even? odd? x))
+;       (lambda (ev? od? n) (if (= n 0) 'true (od? ev? od? (- n 1))))
+;       (lambda (ev? od? n) (if (= n 0) 'false (ev? ev? od? (- n 1)))))
+; )
+; f
+; gosh> (f 5)
+; false
+; gosh> (f 6)
+; true
+; gosh>
+
+
+
+%% If you are familiar with Erlang :-)
+9> F=
+9> fun(X) ->
+9>   fun(Even, Odd) ->
+9>     Even(Even, Odd, X)
+9>   end (
+9>     fun(Ev, Od, N) -> if (N == 0) -> true; true -> Od(Ev, Od, N - 1) end end,
+9>     fun(Ev, Od, N) -> if (N == 0) -> false; true -> Ev(Ev, Od, N - 1) end end
+9>   )
+9> end.
+#Fun<erl_eval.6.90072148>
+10> F(5).
+false
+11> F(6).
+true
+12> F(100)
+12> .
+true
+13> F(101).
+false
+
+
+
+
+Fibonacci:
+(define f
+  (lambda (n)
+    ((lambda (fib) (fib fib n))
+     (lambda (fib n)
+        (cond
+          ((< n 2) n)
+          (else
+            (+ (fib fib (- n 1))
+               (fib fib (- n 2)))))))))
+;;
+;; Execution in Gauche
+5
+(define f
+(lambda (n)
+  ((lambda (fib) (fib fib n))
+   (lambda (fib n)
+      (cond
+        ((< n 2) n)
+        (else
+          (+ (fib fib (- n 1))
+             (fib fib (- n 2)))))))))
+f
+gosh> (f 5)
+5
+gosh> (f 6)
+8
+gosh> (f 7)
+13
+gosh> (f 8)
+21
+gosh> (f 9)
+34
+gosh> (f 10)
+55
+gosh>
+

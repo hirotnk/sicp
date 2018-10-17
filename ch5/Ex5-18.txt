@@ -1,0 +1,227 @@
+(load "./machine2.scm")
+(define fact-machine
+  (make-machine
+#t
+gosh>    (list (list '= =)
+         (list '- -)
+         (list '* *)
+         (list 'read read)
+         (list 'print print))
+   '(controller
+     fact-start
+       (perform (op initialize-stack))
+       (assign continue (label fact-done))
+       (assign n (op read))
+     fact-loop
+       (test (op =) (reg n) (const 1))
+       (branch (label base-case))
+       (save continue)
+       (save n)
+       (assign n (op -) (reg n) (const 1))
+       (assign continue (label after-fact))
+       (goto (label fact-loop))
+     after-fact
+       (restore n)
+       (restore continue)
+       (assign val (op *) (reg n) (reg val))
+       (goto (reg continue))
+     base-case
+       (assign val (const 1))
+       (goto (reg continue))
+     fact-done
+       (perform (op print-stack-statistics))
+       (perform (op print) (reg val)))))
+fact-machine
+(start fact-machine)
+5
+(total-pushes = 8 current-depth = 0 maximum-depth = 8)
+120
+done
+((fact-machine 'trace-register-on) 'val)
+#t
+(fact-machine 'print-ic)
+(instruction-counter: 53)
+(fact-machine 'trace-on)
+#t
+(start fact-machine)
+last label: controller    instruction: (last-label controller)
+last label: fact-start    instruction: (last-label fact-start)
+last label: fact-start    instruction: (perform (op initialize-stack))
+last label: fact-start    instruction: (assign continue (label fact-done))
+5
+last label: fact-start    instruction: (assign n (op read))
+last label: fact-loop    instruction: (last-label fact-loop)
+last label: fact-loop    instruction: (test (op =) (reg n) (const 1))
+last label: fact-loop    instruction: (branch (label base-case))
+last label: fact-loop    instruction: (save continue)
+last label: fact-loop    instruction: (save n)
+last label: fact-loop    instruction: (assign n (op -) (reg n) (const 1))
+last label: fact-loop    instruction: (assign continue (label after-fact))
+last label: fact-loop    instruction: (goto (label fact-loop))
+last label: fact-loop    instruction: (last-label fact-loop)
+last label: fact-loop    instruction: (test (op =) (reg n) (const 1))
+last label: fact-loop    instruction: (branch (label base-case))
+last label: fact-loop    instruction: (save continue)
+last label: fact-loop    instruction: (save n)
+last label: fact-loop    instruction: (assign n (op -) (reg n) (const 1))
+last label: fact-loop    instruction: (assign continue (label after-fact))
+last label: fact-loop    instruction: (goto (label fact-loop))
+last label: fact-loop    instruction: (last-label fact-loop)
+last label: fact-loop    instruction: (test (op =) (reg n) (const 1))
+last label: fact-loop    instruction: (branch (label base-case))
+last label: fact-loop    instruction: (save continue)
+last label: fact-loop    instruction: (save n)
+last label: fact-loop    instruction: (assign n (op -) (reg n) (const 1))
+last label: fact-loop    instruction: (assign continue (label after-fact))
+last label: fact-loop    instruction: (goto (label fact-loop))
+last label: fact-loop    instruction: (last-label fact-loop)
+last label: fact-loop    instruction: (test (op =) (reg n) (const 1))
+last label: fact-loop    instruction: (branch (label base-case))
+last label: fact-loop    instruction: (save continue)
+last label: fact-loop    instruction: (save n)
+last label: fact-loop    instruction: (assign n (op -) (reg n) (const 1))
+last label: fact-loop    instruction: (assign continue (label after-fact))
+last label: fact-loop    instruction: (goto (label fact-loop))
+last label: fact-loop    instruction: (last-label fact-loop)
+last label: fact-loop    instruction: (test (op =) (reg n) (const 1))
+last label: fact-loop    instruction: (branch (label base-case))
+last label: base-case    instruction: (last-label base-case)
+register:val set old value:120  new value:1
+last label: base-case    instruction: (assign val (const 1))
+last label: base-case    instruction: (goto (reg continue))
+last label: after-fact    instruction: (last-label after-fact)
+last label: after-fact    instruction: (restore n)
+last label: after-fact    instruction: (restore continue)
+register:val get value:1
+register:val set old value:1  new value:2
+last label: after-fact    instruction: (assign val (op *) (reg n) (reg val))
+last label: after-fact    instruction: (goto (reg continue))
+last label: after-fact    instruction: (last-label after-fact)
+last label: after-fact    instruction: (restore n)
+last label: after-fact    instruction: (restore continue)
+register:val get value:2
+register:val set old value:2  new value:6
+last label: after-fact    instruction: (assign val (op *) (reg n) (reg val))
+last label: after-fact    instruction: (goto (reg continue))
+last label: after-fact    instruction: (last-label after-fact)
+last label: after-fact    instruction: (restore n)
+last label: after-fact    instruction: (restore continue)
+register:val get value:6
+register:val set old value:6  new value:24
+last label: after-fact    instruction: (assign val (op *) (reg n) (reg val))
+last label: after-fact    instruction: (goto (reg continue))
+last label: after-fact    instruction: (last-label after-fact)
+last label: after-fact    instruction: (restore n)
+last label: after-fact    instruction: (restore continue)
+register:val get value:24
+register:val set old value:24  new value:120
+last label: after-fact    instruction: (assign val (op *) (reg n) (reg val))
+last label: after-fact    instruction: (goto (reg continue))
+last label: fact-done    instruction: (last-label fact-done)
+(total-pushes = 8 current-depth = 0 maximum-depth = 8)
+last label: fact-done    instruction: (perform (op print-stack-statistics))
+register:val get value:120
+120
+last label: fact-done    instruction: (perform (op print) (reg val))
+done
+gosh>
+(start fact-machine)
+last label: controller    instruction: (last-label controller)
+last label: fact-start    instruction: (last-label fact-start)
+last label: fact-start    instruction: (perform (op initialize-stack))
+last label: fact-start    instruction: (assign continue (label fact-done))
+3
+last label: fact-start    instruction: (assign n (op read))
+last label: fact-loop    instruction: (last-label fact-loop)
+last label: fact-loop    instruction: (test (op =) (reg n) (const 1))
+last label: fact-loop    instruction: (branch (label base-case))
+last label: fact-loop    instruction: (save continue)
+last label: fact-loop    instruction: (save n)
+last label: fact-loop    instruction: (assign n (op -) (reg n) (const 1))
+last label: fact-loop    instruction: (assign continue (label after-fact))
+last label: fact-loop    instruction: (goto (label fact-loop))
+last label: fact-loop    instruction: (last-label fact-loop)
+last label: fact-loop    instruction: (test (op =) (reg n) (const 1))
+last label: fact-loop    instruction: (branch (label base-case))
+last label: fact-loop    instruction: (save continue)
+last label: fact-loop    instruction: (save n)
+last label: fact-loop    instruction: (assign n (op -) (reg n) (const 1))
+last label: fact-loop    instruction: (assign continue (label after-fact))
+last label: fact-loop    instruction: (goto (label fact-loop))
+last label: fact-loop    instruction: (last-label fact-loop)
+last label: fact-loop    instruction: (test (op =) (reg n) (const 1))
+last label: fact-loop    instruction: (branch (label base-case))
+last label: base-case    instruction: (last-label base-case)
+register:val set old value:120  new value:1
+last label: base-case    instruction: (assign val (const 1))
+last label: base-case    instruction: (goto (reg continue))
+last label: after-fact    instruction: (last-label after-fact)
+last label: after-fact    instruction: (restore n)
+last label: after-fact    instruction: (restore continue)
+register:val get value:1
+register:val set old value:1  new value:2
+last label: after-fact    instruction: (assign val (op *) (reg n) (reg val))
+last label: after-fact    instruction: (goto (reg continue))
+last label: after-fact    instruction: (last-label after-fact)
+last label: after-fact    instruction: (restore n)
+last label: after-fact    instruction: (restore continue)
+register:val get value:2
+register:val set old value:2  new value:6
+last label: after-fact    instruction: (assign val (op *) (reg n) (reg val))
+last label: after-fact    instruction: (goto (reg continue))
+last label: fact-done    instruction: (last-label fact-done)
+(total-pushes = 4 current-depth = 0 maximum-depth = 4)
+last label: fact-done    instruction: (perform (op print-stack-statistics))
+register:val get value:6
+6
+last label: fact-done    instruction: (perform (op print) (reg val))
+done
+gosh> ((fact-machine 'trace-register-off) 'val)
+#f
+gosh> (start fact-machine)
+last label: controller    instruction: (last-label controller)
+last label: fact-start    instruction: (last-label fact-start)
+last label: fact-start    instruction: (perform (op initialize-stack))
+last label: fact-start    instruction: (assign continue (label fact-done))
+3
+last label: fact-start    instruction: (assign n (op read))
+last label: fact-loop    instruction: (last-label fact-loop)
+last label: fact-loop    instruction: (test (op =) (reg n) (const 1))
+last label: fact-loop    instruction: (branch (label base-case))
+last label: fact-loop    instruction: (save continue)
+last label: fact-loop    instruction: (save n)
+last label: fact-loop    instruction: (assign n (op -) (reg n) (const 1))
+last label: fact-loop    instruction: (assign continue (label after-fact))
+last label: fact-loop    instruction: (goto (label fact-loop))
+last label: fact-loop    instruction: (last-label fact-loop)
+last label: fact-loop    instruction: (test (op =) (reg n) (const 1))
+last label: fact-loop    instruction: (branch (label base-case))
+last label: fact-loop    instruction: (save continue)
+last label: fact-loop    instruction: (save n)
+last label: fact-loop    instruction: (assign n (op -) (reg n) (const 1))
+last label: fact-loop    instruction: (assign continue (label after-fact))
+last label: fact-loop    instruction: (goto (label fact-loop))
+last label: fact-loop    instruction: (last-label fact-loop)
+last label: fact-loop    instruction: (test (op =) (reg n) (const 1))
+last label: fact-loop    instruction: (branch (label base-case))
+last label: base-case    instruction: (last-label base-case)
+last label: base-case    instruction: (assign val (const 1))
+last label: base-case    instruction: (goto (reg continue))
+last label: after-fact    instruction: (last-label after-fact)
+last label: after-fact    instruction: (restore n)
+last label: after-fact    instruction: (restore continue)
+last label: after-fact    instruction: (assign val (op *) (reg n) (reg val))
+last label: after-fact    instruction: (goto (reg continue))
+last label: after-fact    instruction: (last-label after-fact)
+last label: after-fact    instruction: (restore n)
+last label: after-fact    instruction: (restore continue)
+last label: after-fact    instruction: (assign val (op *) (reg n) (reg val))
+last label: after-fact    instruction: (goto (reg continue))
+last label: fact-done    instruction: (last-label fact-done)
+(total-pushes = 4 current-depth = 0 maximum-depth = 4)
+last label: fact-done    instruction: (perform (op print-stack-statistics))
+6
+last label: fact-done    instruction: (perform (op print) (reg val))
+done
+gosh> ^D
+

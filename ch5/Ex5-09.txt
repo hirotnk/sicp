@@ -1,0 +1,3 @@
+It looks just commenint out the treatment of label expression in 'make-primitive-exp'.
+
+

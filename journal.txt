@@ -1,0 +1,87 @@
+2016-09-05(Mon) After moving to Bay Area, the progress is slowing dowon. But I
+read up to 5.4. I have not worked on excercises much. Not starting on 5.5, the
+last section.
+2016-07-31(Sun) Starting on 5.2.4 'Monitoring Machine Performance'
+2016-07-30(Sat) It took me some time to find a bug of the 'add-to-sorted-list'
+function with de-dup. The bug came from the difference between 'eq?' and
+'equal?'. This implies knowledge of specific language matters. Even though I'm
+not specifically interested in Scheme, it's still good to have enough knowledge
+of it. Another bug I spent some time was coming from side-effect. Even though I
+intended to use specific parts of a list, that parts were modified later and
+the result was unexpected.
+2016-07-02(Sat) Read up to 5.1.
+2016-06-19(Sun) Read up to P.466.
+2016-06-11(Sat) Finishing up 4.3, Started reading 4.4.
+2016-06-04(Sat) Read up to 4.3.2, amb operator and natural language parsing.
+2016-05-28(Sat) Reviewed up to Ex4-41.
+2016-05-22(Sun) Reviewed up to Ex4-35.
+2016-05-15(Sun) Reviewed up to the beginning of 4.2.3.
+2016-05-08(Sun) Reviewed up to 4.2.2.
+2016-04-30(Sat) Reviewed up to Ex 4-21 in 4.1.6.
+2016-04-24(Sun) Reviewed Ex 4-18.
+2016-03-25(Fri) Review finished up to 4.1.2.
+2015-12-13(Sun) I have been busy with my work (in mostly a project using
+Java). I almost gave up with this SICP project. But I figured that I will
+continue this at all cost and whatever it takes. Then I forgot most of Ch.4
+now, restarting with the beginning of it now.
+2015-07-20(Mon) Now diving into 4.3
+2015-07-07(Tue) Worked up to Ex4-26. Normal order and applicative order.
+2015-07-06(Mon) Worked up to 4.1.7. Next is 4.2 Lazy Evaluation yay.
+2015-07-04(Sat) Worked up to Ex4-20,21, About Y-operator. Next is 4.1.7.
+2015-06-26(Fri) Started workin on Ex4-11.
+2015-06-25(Thu) Went though up to 4.1.2. The exercises are important to get
+used to the concept here. But I still dont' feel comfortable what's happening
+yet, hoping it will get better as I proceed.
+2015-06-06(Sat) I went to Lambdaconf 2015, Boulder, CO. Now finally started to
+work on Ch4. First tried to make evaluator run. It works partially now. Going
+to work on some exercises now.
+2015-05-03(Sun) Up to Ex 3.72. Weighting functions and merge, first, sort by
+specific weighting function, then find consecutive numbers you want.
+2015-04-26(Sun) Catching up Ch.3 again.
+2015-03-22(Sun) Implemented some of stream functionalities in Erlang in order
+to understand streams better. I think it was helpful. Now going back to scheme.
+2015-03-06(Fri) One this I noticed about stream is, sometiems it's counter
+intuitive, and more difficult to figure out what is going on.
+2015-02-28(Sat) I reviewed some parts of Ch.2. It was worthwhile since I've
+forgotten some of them, or I was not understanding well so far. Now heading
+back to Ch.3 Streams.
+2015-02-10(Tue) I have been believing mutual recursive call is evil since it
+makes code significantly complecated. But I just found there are opposite
+cases.
+2015-02-02(Mon) Now reviewing Ch.2. I noticed that it's more effective not to
+use computer when I work on exercises. Instead of starting coding at first,
+writing down my own idea on paper with a pen really helps understanding the
+problem.
+2015-01-18(Mon) Up to 3.5.2 The concept of stream is intriguing and worth
+studying it.
+2015-01-01(Thu) 3.3.5 Adding a thin abstract layer makes the system suprisingly
+cleaner(Ex 3.37). Also this idea of constraint propagation is really
+interesting. I guess this can be applied to graph data structure.
+2014-12-31(Wed) 3.3.4 Finally done with 3.3.4. The sample code was really
+difficult to read for me.  I think it's because of global states,
+bi-directional control flow(double dispatch) and side-effects. Event-driven
+part is interesting, but still hard to follow and I feel this would be a mess
+if I follow this style in real world.
+2014-10-22(Wed) 3.3.3 - The concept of pointer is similar to that of C, but I
+don't see the way to specify the memory address directory in Scheme.
+2014-09-23(Wed) 3.1.1 Skimmed through up to 3.3.3, starting to work on
+exercises - An environment is a sequence of frames - Each frame is a table of
+bindings with a pointer to the enclosing environment - Modeling with mutable
+data, side effects, sharing and identity
+2014-09-05(Fri) 2.4.3 It's been while to work on SICP since I have been tired
+these days.  What I learned: - data directed programming - interface of modules
+- tagged data - generic apply function
+2014-08-21(Thu) 2.3.4 I'm still reading Huffman code part. (The current project
+is getting busy and making it hard. Anyway.) What I learned so far: -
+Intriguing sort function.  - About transparency. One of the abstractions is
+tranparency and it makes the operations simple. In this case it's transparency
+on tree and leaf. I observe this idea looks related to composite pattern, and
+further, the Java notion of interface. Transparency can be provided this way
+instead of OOP way.  - Agh, I'm giving up ex. 2.69. It's almost done, but I
+can't finish it.  stressful! It's so simple after all.
+2014-08-09(Sat) 2.3.3 2.64 I'm not fully understand it. But the structure is
+same for other recursive functions. Notice it's calling itself twice, firt for
+left sub-tree, and secont for right sub-tree. When you make left sub-tree, you
+only pick the current element, make right-tree, then make tree. 
+2014-08-03(Sun) 2.3.2 2.58 is not complete. it can not handle the cases like:
+(deriv '(1 + 2 * 8 * x + 2 * x) 'x)

@@ -1,0 +1,28 @@
+(define (parse-adjective-noun-phrase)
+  (define (maybe-extend adjective)
+    (amb adjective
+         (list adjective (maybe-extend (parse-word adjectives)))))
+  (list 'adjective-noun-phrase
+    (parse-word articles)
+    (list 'adjectives (maybe-extend (parse-word adjectives)))
+    (parse-word nouns)))
+
+
+(define (parse-noun-phrase)
+  (define (maybe-extend noun-phrase)
+    (amb noun-phrase
+        (maybe-extend
+          (list 'noun-phrase noun-phrase (parse-prepositional-phrase)))))
+  (maybe-extend
+    (amb
+     (parse-simple-noun-phrase)
+     (parse-adjective-noun-phrase))))
+
+Execution:
+;; ;;; Amb-Eval input:
+;; (parse '(the red tall cat eats))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; (sentence (adjective-noun-phrase (article the) (adjectives ((adjective red) (adjective tall))) (noun cat)) (verb eats))
+

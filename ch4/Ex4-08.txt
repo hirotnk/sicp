@@ -1,0 +1,114 @@
+(define (fib n)
+   (let fib-iter
+     ((a 1)
+      (b 0)
+      (count n))
+     (if
+       (= count 0)
+       b
+       (fib-iter (+ a b) a (- count 1)))))
+
+can be transformed to:
+
+(define (fib n)
+  (define (fib-iter a b n)
+    (if
+      (= count 0) b
+      (fib-iter (+ a b) a (- count 1))))
+  (fib-iter 1 0 n))
+
+
++; let->combination
++(define (let? exp) (tagged-list? exp 'let))
++(define (named-let? exp)
++  (and (let? exp) (symbol? (cadr exp))))
++(define (named-let-name exp)
++  (cadr exp))
++
+ (define (let->combination exp)
++  (if
++    (named-let? exp)
++    (let
++      ((varlist (map car (caddr exp)))
++       (arglist (map cadr (caddr exp)))
++       (letbody (cadddr exp))
++       (let-name (named-let-name exp)))
++       (sequence->exp
++         (cons
++           (list 'define (cons let-name varlist) letbody)
++           (list (cons let-name arglist)))))
++    (let
++      ((varlist (map car (cadr exp)))
++       (arglist (map cadr (cadr exp)))
++       (letbody (caddr exp)))
++        ;; 'letbody' is a list, and it needs to be
++        ;; (letbody) in order to be evaluated.
++      (cons (make-lambda varlist (list letbody)) arglist))))
+ 
+ ; cond->if
+ (define (cond? exp) (tagged-list? exp 'cond))
+@@ -346,8 +362,10 @@
+     (list 'cons cons)
+     (list 'cadr cadr)
+     (list '+ +)
++    (list '- -)
+     (list '* *)
+     (list '/ /)
++    (list '= =)
+     (list 'assoc assoc)
+     (list 'null? null?)))
+
+;; ; Execution
+;; [/Users/yoshi/gith/giggle/sicp/ch4%] rlwrap gosh
+;; gosh> (load "./repl")
+;; 
+;; 
+;; ::: M-Eval input:
+;; (define (fib n) (let fib-iter ((a 1) (b 0) (count n)) (if (= count 0) b (fib-iter (+ a b) a (- count 1)))))
+;; 
+;; ;;; M-Eval value:
+;; ok
+;; 
+;; ::: M-Eval input:
+;; (fib 1)
+;; 
+;; ;;; M-Eval value:
+;; 1
+;; 
+;; ::: M-Eval input:
+;; (fib 2)
+;; 
+;; ;;; M-Eval value:
+;; 1
+;; 
+;; ::: M-Eval input:
+;; (fib 3)
+;; 
+;; ;;; M-Eval value:
+;; 2
+;; 
+;; ::: M-Eval input:
+;; (fib 4)
+;; 
+;; ;;; M-Eval value:
+;; 3
+;; 
+;; ::: M-Eval input:
+;; (fib 5)
+;; 
+;; ;;; M-Eval value:
+;; 5
+;; 
+;; ::: M-Eval input:
+;; (fib 6)
+;; 
+;; ;;; M-Eval value:
+;; 8
+;; 
+;; ::: M-Eval input:
+;; (fib 7)
+;; 
+;; ;;; M-Eval value:
+;; 13
+;; 
+;;  

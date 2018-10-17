@@ -1,0 +1,72 @@
+;; [/Users/yoshi/gith/sicp/ch4%] rlwrap gosh
+;; gosh> (load "./repl-amb")
+;; #t
+;; gosh> (amb-run)
+;; 
+;; 
+;; ;;; Amb-Eval input:
+;; (define (require p) (newline) (print "p=" p) (newline) (if (eq? p false) (amb)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; (define (an-integer-between low high) (require (< low high)) (newline) (print "low=" low) (print " high=" high) (newline) (amb low (an-integer-between (+ 1 low) high)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; (an-integer-between 2 5)
+;; 
+;; ;;; Starting a new problem
+;; p=true
+;; 
+;; 
+;; low=2
+;;  high=5
+;; 
+;; 
+;; ;;; Amb-Eval value:
+;; 2
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; p=true
+;; 
+;; 
+;; low=3
+;;  high=5
+;; 
+;; 
+;; ;;; Amb-Eval value:
+;; 3
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; p=true
+;; 
+;; 
+;; low=4
+;;  high=5
+;; 
+;; 
+;; ;;; Amb-Eval value:
+;; 4
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; p=false
+;; 
+;; 
+;; ;;; There are no more values of
+;; (an-integer-between 2 5)
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; 

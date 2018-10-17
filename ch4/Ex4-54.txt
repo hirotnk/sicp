@@ -1,0 +1,63 @@
+(define (require? exp)
+  (tagged-list? exp 'require))
+(define (require-predicate exp)
+  (cadr exp))
+
+(define (analyze-require exp)
+  (let ((pproc (analyze (require-predicate exp))))
+    (lambda (env succeed fail)
+      (pproc env
+             (lambda (pred-value fail2)
+               (if
+                 (not (eq? 'false pred-value))
+                 (succeed 'ok fail2)
+                 (fail2)
+                 ))
+             fail))))
+
+Execution:
+;; ers/yoshi/gith/sicp/ch4%] rlwrap gosh
+;; (load "./repl-amb")
+;; 
+;; (amb-run)
+;; 
+;; (define (an-element-of items)
+;;   (require (not (null? items)))
+;;   (amb (car items) (an-element-of (cdr items))))
+;; 
+;; (an-element-of '(1 2 3))
+;; #t
+;; gosh>
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; 1
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; 2
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; Amb-Eval value:
+;; 3
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; There are no more values of
+;; (an-element-of '(1 2 3))
+;; 
+;; ;;; Amb-Eval input:
+;; 

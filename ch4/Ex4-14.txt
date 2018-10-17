@@ -1,0 +1,39 @@
+map can not apply to a compound list created inside the repl.
+
+Following is the error message I got:
+::: M-Eval input:
+(map (lambda (x) (+ x x)) '(1 2 3))
+*** ERROR: invalid application: ((procedure (x) ((+ x x)) (((car primitive #<subr car>) (cdr primitive #<subr cdr>) (cons primitive #<subr cons>) (cadr primitive #<subr cadr>) (< primitive #<subr <>) (> primitive #<subr >>) (+ primitive #<subr +>) (- primitive #<subr ->) (* primitive #<subr *>) (/ primitive #<subr />) (= primitive #<subr =>) (print primitive #<closure print>) (map primitive #<closure map>) (assoc primitive #<closure assoc>) (null? primitive #<subr null?>) (true . #t) (false . #f)))) 1)
+Stack Trace:
+_______________________________________
+  0  (eval input the-global-environment)
+        At line 486 of "./repl.scm"
+  1  (eval expr env)
+        At line 179 of "/usr/local/Cellar/gauche/0.9.4/share/gauche-0.9/0.9.4/lib/gauche/interactive.scm"
+gosh> ^D
+
+
+Following works:
+[/Users/yoshi/gith/giggle/sicp/ch4%] rlwrap gosh
+gosh> (load "./repl")(driver-loop)
+#t
+gosh>
+
+::: M-Eval input:
+(define (mymap func args)
+  (if
+    (null? args) '()
+    (cons
+        (func (car args))
+        (mymap func (cdr args)))))
+
+;;; M-Eval value:
+ok
+
+::: M-Eval input:
+(mymap (lambda (x) (+ x x)) '(1 2 3))
+
+;;; M-Eval value:
+(2 4 6)
+
+

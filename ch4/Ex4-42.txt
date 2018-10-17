@@ -1,0 +1,82 @@
+(define (exam-result)
+  (let ((betty (amb 1 2 3 4 5))
+        (ethel (amb 1 2 3 4 5))
+        (joan (amb 1 2 3 4 5))
+        (kitty (amb 1 2 3 4 5))
+        (mary (amb 1 2 3 4 5)))
+        (require (distinct? (list betty ethel joan kitty mary)))
+        (require (or (and (not (= betty 3)) (= kitty 2)) (and (= betty 3) (not (= kitty 2)))))
+        (require (or (and (not (= joan 2)) (= ethel 1)) (and (= joan 2) (not (= ethel 1)))))
+        (require (or (and (not (= ethel 5)) (= joan 3)) (and (= ethel 5) (not (= joan 3)))))
+        (require (or (and (not (= mary 4)) (= kitty 2)) (and (= mary 4) (not (= kitty 2)))))
+        (require (or (and (not (= betty 1)) (= mary 4)) (and (= betty 1) (not (= mary 4)))))
+    (list
+    (list 'betty betty)
+    (list 'ethel ethel)
+    (list 'joan joan)
+    (list 'kitty kitty)
+    (list 'mary mary))))
+
+Execution:
+;; ;;; Amb-Eval input:
+;; 
+;; (define (require p)
+;;   (if (not p) (amb)))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (define (distinct? items)
+;;   (cond ((null? items) true)
+;;     ((null? (cdr items)) true)
+;;     ((member (car items) (cdr items)) false)
+;;     (else (distinct? (cdr items)))))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (define (exam-result)
+;;   (let ((betty (amb 1 2 3 4 5))
+;;         (ethel (amb 1 2 3 4 5))
+;;         (joan (amb 1 2 3 4 5))
+;;         (kitty (amb 1 2 3 4 5))
+;;         (mary (amb 1 2 3 4 5)))
+;;         (require (distinct? (list betty ethel joan kitty mary)))
+;;         (require (or (and (not (= betty 3)) (= kitty 2)) (and (= betty 3) (not (= kitty 2)))))
+;;         (require (or (and (not (= joan 2)) (= ethel 1)) (and (= joan 2) (not (= ethel 1)))))
+;;         (require (or (and (not (= ethel 5)) (= joan 3)) (and (= ethel 5) (not (= joan 3)))))
+;;         (require (or (and (not (= mary 4)) (= kitty 2)) (and (= mary 4) (not (= kitty 2)))))
+;;         (require (or (and (not (= betty 1)) (= mary 4)) (and (= betty 1) (not (= mary 4)))))
+;;     (list
+;;     (list 'betty betty)
+;;     (list 'ethel ethel)
+;;     (list 'joan joan)
+;;     (list 'kitty kitty)
+;;     (list 'mary mary))))
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ok
+;; 
+;; ;;; Amb-Eval input:
+;; 
+;; (exam-result)
+;; 
+;; ;;; Starting a new problem
+;; ;;; Amb-Eval value:
+;; ((betty 3) (ethel 5) (joan 2) (kitty 1) (mary 4))
+;; 
+;; ;;; Amb-Eval input:
+;; try-again
+;; 
+;; ;;; There are no more values of
+;; (exam-result)
+;; 
+;; ;;; Amb-Eval input:
+;; 

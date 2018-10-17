@@ -1,0 +1,5 @@
+Ex5-17:
+1. add 'last-label instruction each time label is found.
+2. 'last-label instruction is a lambda that only increments pc.
+3. in execute function, if 'last-label instruction is found, set the label name to the machine's variable for it ('save-label in this case).
+

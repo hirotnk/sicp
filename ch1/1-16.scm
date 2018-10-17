@@ -1,0 +1,32 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-advanced-reader.ss" "lang")((modname 1-16) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f ())))
+(define (fast-expt b n)
+  (cond ((= n 0) 1)
+        ((even? n) (sqr (fast-expt b (/ n 2))))
+        (else (* b (fast-expt b (- n 1))))))
+
+(fast-expt 2 0)
+(fast-expt 2 1)
+(fast-expt 2 2)
+(fast-expt 2 3)
+(fast-expt 2 4)
+(fast-expt 2 5)
+(fast-expt 2 6)
+(fast-expt 2 7)
+(fast-expt 2 8)
+
+(define (expt-ite a b n)
+  (cond ((<= n 0) a)
+        ((even? n) (expt-ite a (* b b) (/ n 2)))
+        (else (expt-ite (* a b) b (- n 1)))))
+
+(expt-ite 1 2 0)
+(expt-ite 1 2 1)
+(expt-ite 1 2 2)
+(expt-ite 1 2 3)
+(expt-ite 1 2 4)
+(expt-ite 1 2 5)
+(expt-ite 1 2 6)
+(expt-ite 1 2 7)
+(expt-ite 1 2 8)

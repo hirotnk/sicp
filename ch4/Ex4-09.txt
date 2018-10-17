@@ -1,0 +1,168 @@
+     ((cond? exp) (eval (cond->if exp) env))
+     ((let? exp) (eval (let->combination exp) env))
+     ((let*? exp) (eval (let*->nested-lets exp) env))
++    ((for? exp) (eval (for->combination exp) env))
+     ((application? exp)
+       (apply
+         (eval (operator exp) env)
++;; for->combination
++;; Form: (for <x> in <param list> <for-body>)
++;;  <x>: an element in <param list>
++;;  <param list>: a list
++;;  <for-body>: a sequence of expressions. <x> can be used in <for-body>
++;;
++;; e.g.
++;; (for->combination '(for x in param (print (+ x 1 2))))
++;; =>
++;; (if
++;;   (null? param) 'ok
++;;   ((lambda (params)
++;;     (define (for-loop x params)
++;;       (if
++;;         (null? params)
++;;         (print (+ x 1 2))
++;;         (begin
++;;           (print (+ x 1 2))
++;;           (for-loop (car params) (cdr params)))))
++;;     (for-loop (car params) (cdr params))) param))
++
++(define (for? exp)
++  (and
++    (tagged-list? exp 'for)
++    (eq? (caddr exp) 'in)))
++(define (for-variable exp) (cadr exp))
++(define (for-params exp) (cadddr exp))
++(define (for-body exp) (last exp))
++(define (make-loop param1 param2) (list 'for-loop param1 param2))
++(define car-params (list 'car 'params))
++(define cdr-params (list 'cdr 'params))
++(define (for->combination exp)
++  (make-if
++    ;;Handle empty list case
++    (list 'null? (for-params exp))
++    (quote 'ok)
++    (list
++      (make-lambda (list 'params)
++        (list
++          (list 'define (make-loop (for-variable exp) 'params)
++            (make-if
++              (list 'null? 'params)
++              (for-body exp)
++              (cons 'begin
++                (list
++                  (for-body exp)
++                  (make-loop car-params cdr-params)))))
++          (make-loop car-params cdr-params))) (for-params exp))))
++
++
+
+     (list '* *)
+     (list '/ /)
+     (list '= =)
++    (list 'print print)
++    (list 'map map)
+     (list 'assoc assoc)
+     (list 'null? null?)))
+
+;; Execution
+;; [/Users/yoshi/gith/giggle/sicp/ch4%] rlwrap gosh
+;; gosh> (load "./repl")
+;; #t
+;; gosh> (driver-loop)
+;;
+;;
+;; ::: M-Eval input:
+;; (define (for-test param) (begin (for x in param (print (+ x x x))) 'ok))
+;;
+;; ;;; M-Eval value:
+;; ok
+;;
+;; ::: M-Eval input:
+;; (for-test '(1 2 3))
+;; 3
+;; 6
+;; 9
+;;
+;; ;;; M-Eval value:
+;; ok
+;;
+;;
+ 
+diff --git a/sicp/ch4/repl.scm b/sicp/ch4/repl.scm
+index 132f581..074f385 100644
+--- a/sicp/ch4/repl.scm
++++ b/sicp/ch4/repl.scm
+@@ -33,6 +33,7 @@
+     ((let? exp) (eval (let->combination exp) env))
+     ((let*? exp) (eval (let*->nested-lets exp) env))
+     ((for? exp) (eval (for->combination exp) env))
++    ((while? exp) (eval (while->combination exp) env))
+     ((application? exp)
+       (apply
+         (eval (operator exp) env)
+@@ -326,6 +327,19 @@
+                   (make-loop car-params cdr-params)))))
+           (make-loop car-params cdr-params))) (for-params exp))))
+ 
++(define (while? exp) (tagged-list? exp 'while))
++(define (while-condition exp) (cadr exp))
++(define (while-body exp) (caddr exp))
++(define (while->combination exp)
++  (list
++    (make-lambda '()
++      (list (list 'define (list 'while-ite)
++        (make-if
++          (while-condition exp)
++          (cons 'begin
++            (list
++              (while-body exp)
++              (list 'while-ite))) (quote 'ok))) (list 'while-ite)))))
+ 
+ (define (make-procedure parameters body env)
+   (list 'procedure parameters body env))
+@@ -405,6 +419,8 @@
+     (list 'cdr cdr)
+     (list 'cons cons)
+     (list 'cadr cadr)
++    (list '< <)
++    (list '> >)
+     (list '+ +)
+     (list '- -)
+     (list '* *)
+;; Execution
+;; [/Users/yoshi/gith/giggle/sicp/ch4%] rlwrap gosh
+;; gosh> (load "./repl")
+;; #t
+;; gosh> (driver-loop)
+;; 
+;; 
+;; ::: M-Eval input:
+;; (define (while-test x) (begin (while (< x 10) (begin (print x) (set! x (+ x 1))))))
+;; 
+;; ;;; M-Eval value:
+;; ok
+;; 
+;; ::: M-Eval input:
+;; (define y 0)
+;; 
+;; ;;; M-Eval value:
+;; ok
+;; 
+;; ::: M-Eval input:
+;; (while-test y)
+;; 0
+;; 1
+;; 2
+;; 3
+;; 4
+;; 5
+;; 6
+;; 7
+;; 8
+;; 9
+;; 
+;; ;;; M-Eval value:
+;; ok
+;; 
+;; ::: M-Eval input:
+;; 

@@ -1,0 +1,27 @@
+Since the transformed version adds 'let' statement which is a disguised lambda
+expression, another environment is added when it's evaluated.
+
+
+This form is transformed from:
+(lambda ⟨vars⟩
+  (let ((u '*unassigned*)
+        (v '*unassigned*))
+  (set! u ⟨e1⟩)
+  (set! v ⟨e2⟩)
+  ⟨e3⟩))
+
+To:
+(lambda (vars)
+  (lambda (u v)
+    (set! u ⟨e1⟩)
+    (set! v ⟨e2⟩)
+    ⟨e3⟩)('*unassigned* '*unassigned*))
+
+
+Example:
+((lambda (vars)
+  ((lambda (u v)
+        (set! u 1)
+        (set! v 2)
+        (+ u v vars)) '*unassigned '*unassigned)) 3)
+

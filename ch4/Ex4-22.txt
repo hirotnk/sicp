@@ -1,0 +1,6 @@
+
+(define (analyze exp)
+  (cond
+    ...
+    ((let? exp) (analyze (let->combination exp)))
+    ....
